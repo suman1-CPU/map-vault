@@ -1,100 +1,193 @@
 <title>MAP Vault</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1c5bd8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗝️</text></svg>">
 <style>
 :root{
-  --bg:#f6f7f9; --card:#fff; --ink:#14181f; --mut:#5b6572; --line:#e3e7ec;
-  --accent:#2f6df6; --accent-ink:#fff; --chip:#eef2f7; --danger:#c0392b;
-  --secret:#8a6d00; --secretbg:#fff7dd; --ok:#137a3f; --shadow:0 1px 2px rgba(20,24,31,.06),0 4px 16px rgba(20,24,31,.06);
+  --bg:#f2f4f8; --card:#ffffff; --ink:#111726; --mut:#61708b; --line:#e2e7f0;
+  --accent:#1c5bd8; --accent-soft:#e8effc; --accent-ink:#fff;
+  --chip:#eef1f7; --red:#d92d20; --redbg:#fee4e2; --amber:#b54708; --amberbg:#fef0c7;
+  --green:#067647; --greenbg:#dcfae6; --gold:#8a6d00; --goldbg:#fff4c6;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.06);
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --navh:64px;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0f1115; --card:#171b22; --ink:#e7ebf0; --mut:#9aa4b2; --line:#262c36;
-  --accent:#4f8bff; --chip:#20262f; --secret:#e8c65a; --secretbg:#2a2410; --ok:#4cc57e; --danger:#ff6b5e;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  --bg:#0d1117; --card:#161c26; --ink:#e8edf5; --mut:#95a1b6; --line:#232c3b;
+  --accent:#3b82f6; --accent-soft:#16233c; --chip:#1d2635;
+  --red:#ff6b5e; --redbg:#3a1512; --amber:#ffc164; --amberbg:#3a2a0e;
+  --green:#4cc57e; --greenbg:#0f2b1c; --gold:#e8c65a; --goldbg:#2f2810;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.35);
 }}
-:root[data-theme="light"]{--bg:#f6f7f9;--card:#fff;--ink:#14181f;--mut:#5b6572;--line:#e3e7ec;--chip:#eef2f7;--secret:#8a6d00;--secretbg:#fff7dd;--ok:#137a3f;--danger:#c0392b;}
-:root[data-theme="dark"]{--bg:#0f1115;--card:#171b22;--ink:#e7ebf0;--mut:#9aa4b2;--line:#262c36;--accent:#4f8bff;--chip:#20262f;--secret:#e8c65a;--secretbg:#2a2410;--ok:#4cc57e;--danger:#ff6b5e;}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
-header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{font-family:var(--mono);font-weight:700;background:var(--accent);color:var(--accent-ink);padding:3px 8px;border-radius:6px;font-size:13px;letter-spacing:.5px}
-h1{font-size:16px;margin:0;font-weight:650}
+:root[data-theme="light"]{--bg:#f2f4f8;--card:#fff;--ink:#111726;--mut:#61708b;--line:#e2e7f0;--accent:#1c5bd8;--accent-soft:#e8effc;--chip:#eef1f7;--red:#d92d20;--redbg:#fee4e2;--amber:#b54708;--amberbg:#fef0c7;--green:#067647;--greenbg:#dcfae6;--gold:#8a6d00;--goldbg:#fff4c6;--shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.06)}
+:root[data-theme="dark"]{--bg:#0d1117;--card:#161c26;--ink:#e8edf5;--mut:#95a1b6;--line:#232c3b;--accent:#3b82f6;--accent-soft:#16233c;--chip:#1d2635;--red:#ff6b5e;--redbg:#3a1512;--amber:#ffc164;--amberbg:#3a2a0e;--green:#4cc57e;--greenbg:#0f2b1c;--gold:#e8c65a;--goldbg:#2f2810;--shadow:0 1px 2px rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.35)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
+  padding-bottom:calc(var(--navh) + env(safe-area-inset-bottom));}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:var(--ink)}
+a{color:var(--accent);text-decoration:none}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
+.logo{font-size:22px}
+h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
 .grow{flex:1}
-.who{font-size:13px;color:var(--mut)}
-.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--chip);color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--chip);color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
 .badge.admin{background:var(--accent);color:var(--accent-ink)}
-.search{width:100%;max-width:520px}
-input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 12px;outline:none}
-input:focus,select:focus{border-color:var(--accent)}
-.wrap{max-width:1100px;margin:0 auto;padding:14px 16px 80px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
-.tab{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:20px;padding:6px 13px;font-size:13px;font-weight:600}
-.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.count{font-size:11px;opacity:.7;margin-left:5px}
-.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 2px;font-size:15px;font-weight:650}
-.card .sub{color:var(--mut);font-size:12px;margin-bottom:10px;font-family:var(--mono)}
-.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13.5px;align-items:baseline}
-.kv .k{color:var(--mut);font-size:12px}
-.kv .v{font-family:var(--mono);word-break:break-word}
-.kv .v.blank{color:var(--mut);font-family:var(--sans);font-style:italic;opacity:.6}
-.reveal{cursor:pointer;border:1px solid var(--line);background:var(--secretbg);color:var(--secret);border-radius:7px;padding:1px 8px;font-size:12px;font-weight:600;font-family:var(--sans)}
-.reveal:hover{filter:brightness(.97)}
-.revealed{color:var(--secret);background:var(--secretbg);padding:1px 6px;border-radius:6px}
-.copy{cursor:pointer;border:none;background:none;color:var(--mut);font-size:12px;padding:0 4px}
-.copy:hover{color:var(--accent)}
-.muted{color:var(--mut)}
-.empty{text-align:center;color:var(--mut);padding:60px 20px}
-.btn{cursor:pointer;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 14px}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.sm{padding:5px 10px;font-size:13px}
-.iconbtn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;width:36px;height:36px;font-size:15px}
-.scrim{position:fixed;inset:0;background:rgba(10,12,16,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
-.scrim.on{display:flex}
-.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:440px;width:100%;box-shadow:var(--shadow)}
-.modal h2{margin:0 0 4px;font-size:18px}
-.modal p{color:var(--mut);font-size:13px;margin:0 0 16px}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:5px}
-.field input{width:100%}
-.conn{width:9px;height:9px;border-radius:50%;background:var(--mut);display:inline-block}
-.conn.ok{background:var(--ok)} .conn.err{background:var(--danger)} .conn.demo{background:var(--secret)}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;width:38px;height:38px;font-size:16px;flex:0 0 auto}
+
+/* ---------- search ---------- */
+.searchwrap{position:sticky;top:calc(59px + env(safe-area-inset-top));z-index:25;background:var(--bg);padding:12px 16px 8px;max-width:760px;margin:0 auto}
+.searchbox{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.searchbox:focus-within{border-color:var(--accent)}
+.searchbox input{flex:1;border:none;outline:none;background:none;font-size:16px;min-width:0}
+.searchbox .clear{border:none;background:var(--chip);border-radius:50%;width:26px;height:26px;font-size:13px;color:var(--mut);display:none}
+
+/* ---------- layout ---------- */
+.wrap{max-width:760px;margin:0 auto;padding:8px 16px 40px}
+.section{margin:18px 0 8px;display:flex;align-items:baseline;gap:8px}
+.section h2{font-size:14px;margin:0;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.section .more{margin-left:auto;font-size:13.5px;font-weight:600;background:none;border:none;color:var(--accent)}
+
+/* ---------- cards & rows ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.rowlist .row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line);cursor:pointer}
+.rowlist .row:last-child{border-bottom:none}
+.rowlist .row:active{background:var(--chip)}
+.row .avatar{width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 auto}
+.row .rmain{flex:1;min-width:0}
+.row .rname{font-weight:650;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .rsub{font-size:12.5px;color:var(--mut);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .chev{color:var(--mut);font-size:18px;flex:0 0 auto}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--chip);color:var(--mut);white-space:nowrap;flex:0 0 auto}
+.pill.red{background:var(--redbg);color:var(--red)}
+.pill.amber{background:var(--amberbg);color:var(--amber)}
+.pill.green{background:var(--greenbg);color:var(--green)}
+.pill.gold{background:var(--goldbg);color:var(--gold)}
+
+/* stat tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;cursor:pointer;box-shadow:var(--shadow)}
+.tile b{display:block;font-size:22px}
+.tile span{font-size:12px;color:var(--mut);font-weight:600}
+.tile.warn b{color:var(--red)}
+
+/* ---------- dossier ---------- */
+.dhead{padding:18px 16px 14px;border-bottom:1px solid var(--line)}
+.dhead h2{margin:0 0 4px;font-size:20px;line-height:1.25}
+.dhead .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mut)}
+.mono{font-family:var(--mono)}
+.dsec{padding:6px 16px 14px}
+.dsec h3{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px;font-weight:700}
+.fact{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.fact:last-child{border-bottom:none}
+.fact .fl{width:118px;flex:0 0 auto;font-size:12.5px;color:var(--mut);font-weight:600}
+.fact .fv{flex:1;min-width:0;font-family:var(--mono);font-size:14.5px;word-break:break-word}
+.fact .fv.plain{font-family:var(--sans)}
+.fact .copy{border:none;background:var(--chip);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--mut);flex:0 0 auto}
+.fact .copy:active{background:var(--accent-soft);color:var(--accent)}
+.reveal{border:1px solid var(--line);background:var(--goldbg);color:var(--gold);border-radius:9px;padding:6px 12px;font-size:13px;font-weight:700;flex:0 0 auto}
+.lockchip{font-size:12px;color:var(--mut);background:var(--chip);border-radius:8px;padding:5px 10px;flex:0 0 auto}
+.revealed{background:var(--goldbg);color:var(--gold);border-radius:6px;padding:2px 7px}
+.dueband{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px 4px}
+.duecard{border:1px solid var(--line);border-radius:13px;padding:11px 13px}
+.duecard .dl{font-size:12px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.duecard .dv{font-size:17px;font-weight:750;margin-top:3px}
+.duecard .dn{font-size:12px;color:var(--mut);margin-top:2px}
+.duecard.red{background:var(--redbg);border-color:transparent} .duecard.red .dv,.duecard.red .dl{color:var(--red)}
+.duecard.amber{background:var(--amberbg);border-color:transparent} .duecard.amber .dv,.duecard.amber .dl{color:var(--amber)}
+.srcnote{padding:2px 16px 14px;font-size:11.5px;color:var(--mut)}
+.backbtn{border:none;background:none;color:var(--accent);font-weight:650;font-size:15px;padding:14px 16px 0;display:flex;align-items:center;gap:6px}
+
+/* ---------- bottom nav ---------- */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;max-width:120px;border:none;background:none;color:var(--mut);font-size:11px;font-weight:650;
+  display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px}
+nav button .ni{font-size:21px;line-height:1.15}
+nav button.on{color:var(--accent)}
+nav button.on .ni{transform:scale(1.06)}
+
+/* ---------- filters ---------- */
+.filters{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;-webkit-overflow-scrolling:touch}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:20px;padding:7px 14px;font-size:13.5px;font-weight:650;white-space:nowrap}
+.fbtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ---------- misc tables ---------- */
+.acc{border-bottom:1px solid var(--line)}
+.acc:last-child{border-bottom:none}
+.acc>button{width:100%;border:none;background:none;text-align:left;padding:14px 16px;font-size:15px;font-weight:650;display:flex;align-items:center;gap:10px}
+.acc .chev{margin-left:auto;color:var(--mut);transition:transform .15s}
+.acc.open .chev{transform:rotate(90deg)}
+.accbody{display:none;padding:0 16px 14px;overflow-x:auto}
+.acc.open .accbody{display:block}
 table.misc{width:100%;border-collapse:collapse;font-size:13px}
-table.misc td{border:1px solid var(--line);padding:5px 8px;vertical-align:top;font-family:var(--mono)}
-table.misc tr:first-child td{background:var(--chip);font-family:var(--sans);font-weight:600}
-.miscblock{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;overflow-x:auto}
-.miscblock h4{margin:0 0 8px;font-size:14px}
-.locked{border:1px dashed var(--line);border-radius:10px;padding:10px;color:var(--secret);background:var(--secretbg);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none}
+table.misc td{border:1px solid var(--line);padding:6px 9px;vertical-align:top;font-family:var(--mono)}
+.locked{border:1px dashed var(--gold);border-radius:12px;padding:12px 14px;color:var(--gold);background:var(--goldbg);font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 16px 12px}
+
+/* ---------- modal / toast / empty ---------- */
+.scrim{position:fixed;inset:0;background:rgba(9,12,18,.55);display:none;align-items:flex-end;justify-content:center;z-index:60;padding:0}
+.scrim.on{display:flex}
+@media(min-width:640px){.scrim{align-items:center;padding:16px}}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));max-width:460px;width:100%;box-shadow:var(--shadow)}
+@media(min-width:640px){.modal{border-radius:20px;padding-bottom:22px}}
+.modal h2{margin:0 0 6px;font-size:18px}
+.modal p{color:var(--mut);font-size:13.5px;margin:0 0 16px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:650;color:var(--mut);margin-bottom:5px}
+.field input{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;background:var(--bg);outline:none;font-size:16px}
+.field input:focus{border-color:var(--accent)}
+.btn{font-weight:650;border:1px solid var(--line);background:var(--card);border-radius:11px;padding:11px 16px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toast{position:fixed;bottom:calc(var(--navh) + 14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:14px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;max-width:88vw;text-align:center}
 .toast.on{opacity:1}
+.empty{text-align:center;color:var(--mut);padding:48px 20px;font-size:15px}
+.empty .big{font-size:34px;display:block;margin-bottom:8px}
+.skel{height:110px;border-radius:16px;background:linear-gradient(100deg,var(--chip) 40%,var(--card) 50%,var(--chip) 60%);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.conn{width:9px;height:9px;border-radius:50%;background:var(--mut);flex:0 0 auto}
+.conn.ok{background:var(--green)} .conn.err{background:var(--red)}
+.gletter{position:sticky;top:calc(118px + env(safe-area-inset-top));font-size:12px;font-weight:800;color:var(--mut);padding:10px 4px 4px;background:var(--bg);z-index:5}
 </style>
 
 <header>
-  <span class="logo">VAULT</span>
-  <h1>MAP Vault</h1>
-  <input class="search" id="q" placeholder="Search company, person, VAT no., login…">
+  <span class="logo">🗝️</span><h1>MAP Vault</h1>
   <span class="grow"></span>
-  <span class="who" id="who"></span>
-  <span class="conn" id="conn" title="connection"></span>
-  <button class="iconbtn" id="themeBtn" title="Theme">◐</button>
-  <button class="iconbtn" id="gear" title="Connection">⚙</button>
+  <span id="who" style="font-size:13px;color:var(--mut)"></span>
+  <span class="conn" id="conn"></span>
+  <button class="iconbtn" id="themeBtn" title="Light/dark">◐</button>
 </header>
 
-<div class="wrap">
-  <div class="tabs" id="tabs"></div>
-  <div id="view"></div>
+<div class="searchwrap" id="searchwrap">
+  <div class="searchbox">🔍<input id="q" placeholder="Search a client, person or number…" autocomplete="off">
+  <button class="clear" id="qclear">✕</button></div>
 </div>
 
-<!-- CONNECT -->
+<div class="wrap" id="view"></div>
+
+<nav id="nav">
+  <button data-v="home"><span class="ni">🏠</span>Home</button>
+  <button data-v="clients"><span class="ni">👥</span>Clients</button>
+  <button data-v="deadlines"><span class="ni">📅</span>Deadlines</button>
+  <button data-v="more"><span class="ni">⚙️</span>More</button>
+</nav>
+
 <div class="scrim" id="scrim">
   <div class="modal">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="logo">VAULT</span><h2 id="mTitle">Connect to the vault</h2></div>
-    <p id="mMsg">Paste the web-app URL and your personal access code. Both are stored on this device only.</p>
-    <div class="field"><label>Web app URL</label><input id="mUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
-    <div class="field"><label>Your access code</label><input id="mCode" placeholder="personal code" autocomplete="off"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+    <h2>Connect to the vault</h2>
+    <p id="mMsg">Paste your personal access code (from your invite link). It stays on this device only.</p>
+    <div class="field"><label>Your access code</label><input id="mCode" placeholder="access code" autocomplete="off"></div>
+    <details style="margin-bottom:14px"><summary style="font-size:13px;color:var(--mut)">Advanced: web app URL</summary>
+      <div class="field" style="margin-top:8px"><label>Web app URL</label><input id="mUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
+    </details>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn" id="mCancel">Cancel</button>
       <button class="btn primary" id="mConnect">Connect</button>
     </div>
@@ -106,184 +199,375 @@ table.misc tr:first-child td{background:var(--chip);font-family:var(--sans);font
 <script>
 "use strict";
 const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyopmm6e_aymCbnz3phNKU9Ag-9vaXf0nQVjnn3ukOukLqSJj6oPNy5veC2KuPKuuew/exec";
-const CFG_KEY="mapvault.cfg", THEME_KEY="mapvault.theme";
-let CFG=loadCfg(), STATE=null, TAB="Companies", Q="", DEMO=false;
+const CFG_KEY="mapvault.cfg", THEME_KEY="mapvault.theme", RECENT_KEY="mapvault.recent";
+let CFG=loadJ(CFG_KEY,{}), STATE=null, IDX=null, VIEWN="home", DETAIL=null, Q="", DLFILTER="soon";
 
-const FIELDS={
-  Companies:[["companyNo","Company no."],["contact","Contact"],["utr","UTR"],["vatNo","VAT no."],
-    ["authCode","CH auth code",1],["ggId","Gov Gateway ID",1],["ggPassword","GG password",1],
-    ["ni","NI number",1],["dob","Date of birth",1],["email","Email"],["phone","Phone"],
-    ["incDate","Incorporated"],["address","Address"]],
-  PersonalCodes:[["company","Company"],["personalCode","Personal code",1],["verifiedOn","Verified"],
-    ["doc1","Document 1",1],["doc2","Document 2",1],["invoiced","Invoiced"],["email","Email"]],
-  Logins:[["entity","Entity"],["username","Username / GG ID",1],["password","Password",1],
-    ["email","Email"],["phone","Phone"],["notes","Notes"]],
-  Pensions:[["stagingDate","Staging"],["deadline","Deadline"],["payeRef","PAYE ref"],["letterCode","Letter code"],
-    ["loggedInAs","Logged in as"],["nestEmployerId","NEST employer"],["nestDelegateId","NEST delegate"],
-    ["completeBy","Complete by"],["completed","Completed"]],
-  Deadlines:[["accountsDue","Accounts due"],["csMadeUpTo","CS made-up-to"],["csFileBy","CS file by"],
-    ["idvDue","IDV due"],["codesHeld","Codes held"]]
-};
-const TITLECOL={Companies:"company",PersonalCodes:"person",Logins:"system",Pensions:"employer",Deadlines:"company"};
-const SUBCOL={Companies:"company",Logins:"entity",PersonalCodes:"company"};
-
-function loadCfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY))||{}}catch(e){return{}}}
-function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(CFG))}catch(e){}}
+/* ---------- utils ---------- */
 function $(s){return document.querySelector(s)}
+function loadJ(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
+function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1800)}
-function setConn(s){const c=$("#conn");c.className="conn"+(s?" "+s:"")}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),1900)}
+function setConn(s){$("#conn").className="conn"+(s?" "+s:"")}
+function copyTxt(v){navigator.clipboard.writeText(v).then(()=>toast("Copied"),()=>toast("Copy failed"))}
+function normNo(n){const s=String(n||"").replace(/\D/g,"");return s.replace(/^0+/,"")}
+function normName(s){return String(s||"").toLowerCase().replace(/\b(ltd|limited|llp|plc|the)\b/g," ").replace(/[^a-z0-9]+/g," ").trim()}
+function initials(s){const w=String(s||"?").split(/\s+/).filter(Boolean);return ((w[0]||"?")[0]+(w[1]?w[1][0]:"")).toUpperCase()}
+function parseDMY(s){if(!s)return null;const p=String(s).split("/");if(p.length!==3)return null;const d=new Date(+p[2],+p[1]-1,+p[0]);return isNaN(d)?null:d}
+function daysTo(s){const d=parseDMY(s);if(!d)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/86400000)}
+function dueClass(days,overdue){if(overdue||days!=null&&days<0)return"red";if(days!=null&&days<=14)return"red";if(days!=null&&days<=31)return"amber";return""}
+function dueNote(days,overdue){if(overdue)return"OVERDUE";if(days==null)return"";if(days<0)return Math.abs(days)+"d overdue";if(days===0)return"today";if(days===1)return"tomorrow";if(days<=60)return"in "+days+" days";return""}
 
+/* ---------- api ---------- */
 async function api(op,payload){
-  const u=new URL(CFG.url);
+  const u=new URL(CFG.url||DEFAULT_API_URL);
   u.searchParams.set("k",CFG.code);
   if(op)u.searchParams.set("op",op);
   if(payload)u.searchParams.set("payload",JSON.stringify(payload));
-  const r=await fetch(u.toString(),{method:"GET"});
+  const r=await fetch(u.toString());
   const j=await r.json();
   if(!j.ok)throw new Error(j.error||"error");
   return j;
 }
-
 async function connect(announce){
   try{
     setConn();
+    renderSkeleton();
     const j=await api("",null);
-    STATE=j.state; DEMO=false; saveCfg();
-    closeConnect(); paint(); setConn("ok");
-    if(announce)toast("Connected — "+STATE.me+(STATE.role==="admin"?" (admin)":""));
+    STATE=j.state;buildIndex();saveJ(CFG_KEY,CFG);
+    closeConnect();setConn("ok");
+    $("#who").textContent=STATE.me;
+    paint();
+    if(announce)toast("Hi "+STATE.me+" — connected"+(STATE.role==="admin"?" as admin":""));
   }catch(e){
     setConn("err");
-    showConnect("Could not connect: "+(e.message||e)+". Check the URL, your access code, and that the web app is deployed to “Anyone”.");
+    $("#view").innerHTML='<div class="empty"><span class="big">🔌</span>Not connected</div>';
+    showConnect("Could not connect: "+(e.message||e)+". Check your access code.");
   }
 }
 
-/* ---------- render ---------- */
+/* ---------- index: join everything by client ---------- */
+function buildIndex(){
+  const d=STATE.data, clients=new Map(), people=new Map();
+  const keyFor=(no,name)=>normNo(no)||("n:"+normName(name));
+  function client(no,name){
+    const k=keyFor(no,name);
+    if(!clients.has(k))clients.set(k,{k,name:name||"",no:normNo(no)?String(no):"",c:null,dl:null,logins:[],codes:[],pension:[]});
+    const c=clients.get(k);
+    if(name&&(!c.name||/LIMITED|LTD/i.test(name)===false&&c.name.length<name.length===false))c.name=c.name||name;
+    return c;
+  }
+  (d.Companies||[]).forEach(r=>{const c=client(r.companyNo,r.company||r.contact);c.c=r;if(r.company)c.name=r.company});
+  (d.Deadlines||[]).forEach(r=>{const c=client(r.companyNo,r.company);c.dl=r;if(!c.name)c.name=r.company});
+  const byName=new Map();clients.forEach(c=>{const n=normName(c.name);if(n&&!byName.has(n))byName.set(n,c)});
+  (d.Logins||[]).forEach(r=>{const c=byName.get(normName(r.entity));if(c)c.logins.push(r);else{const nc=client("",r.entity);nc.logins.push(nc&&r)}});
+  (d.PersonalCodes||[]).forEach(r=>{
+    const c=byName.get(normName(r.company));if(c)c.codes.push(r);
+    const pk=r.person.trim().toLowerCase();
+    if(!people.has(pk))people.set(pk,{person:r.person,entries:[]});
+    people.get(pk).entries.push(r);
+  });
+  (d.Pensions||[]).forEach(r=>{const c=byName.get(normName(r.employer));if(c)c.pension.push(r)});
+  const list=[...clients.values()].filter(c=>c.name);
+  list.sort((a,b)=>a.name.localeCompare(b.name));
+  IDX={clients:list,byKey:new Map(list.map(c=>[c.k,c])),people:[...people.values()]};
+}
+function nextDue(c){
+  if(!c.dl)return null;
+  const cand=[["Accounts",c.dl.accountsDue,c.dl.accountsOverdue],["CS",c.dl.csDue,c.dl.csOverdue]]
+    .map(([t,s,o])=>({t,s,o:o==="yes",days:daysTo(s)})).filter(x=>x.s);
+  if(!cand.length)return null;
+  cand.sort((a,b)=>(a.days??9e9)-(b.days??9e9));
+  return cand[0];
+}
+
+/* ---------- painting ---------- */
 function paint(){
-  $("#who").innerHTML = STATE ? esc(STATE.me)+' <span class="badge '+(STATE.role==="admin"?"admin":"")+'">'+esc(STATE.role)+"</span>" : "";
-  renderTabs(); render();
-}
-function tabList(){
-  const t=["Companies","PersonalCodes","Logins","Pensions","Deadlines"];
-  if(STATE&&(Object.keys(STATE.misc||{}).length||(STATE.miscSecret&&STATE.miscSecret.length)))t.push("Other");
-  return t;
-}
-const TABLABEL={Companies:"Companies",PersonalCodes:"Personal codes",Logins:"Logins",Pensions:"Pensions",Deadlines:"Deadlines",Other:"Other sheets"};
-function renderTabs(){
-  $("#tabs").innerHTML=tabList().map(t=>{
-    const n=(STATE&&STATE.data&&STATE.data[t])?STATE.data[t].length:"";
-    return '<div class="tab'+(t===TAB?" on":"")+'" data-t="'+t+'">'+TABLABEL[t]+(n!==""?'<span class="count">'+n+"</span>":"")+"</div>";
-  }).join("");
-  document.querySelectorAll(".tab").forEach(el=>el.onclick=()=>{TAB=el.dataset.t;render();renderTabs()});
-}
-function matches(o){
-  if(!Q)return true;
-  return Object.keys(o).some(k=>String(o[k]||"").toLowerCase().includes(Q));
-}
-function render(){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===VIEWN));
+  $("#searchwrap").style.display=(VIEWN==="home"||VIEWN==="clients")&&!DETAIL?"":"none";
   const v=$("#view");
-  if(!STATE){v.innerHTML='<div class="empty">Not connected. Tap ⚙ to connect.</div>';return}
-  if(TAB==="Other")return renderOther(v);
-  const rows=(STATE.data[TAB]||[]).filter(matches);
-  if(!rows.length){v.innerHTML='<div class="empty">'+(Q?"No matches for “"+esc(Q)+"”.":"Nothing here yet.")+"</div>";return}
-  v.innerHTML='<div class="cards">'+rows.map(o=>card(TAB,o)).join("")+"</div>";
-  wireCards();
+  if(!STATE){v.innerHTML='<div class="empty"><span class="big">🔌</span>Not connected</div>';return}
+  if(DETAIL){renderDetail(v);return}
+  if(VIEWN==="home")renderHome(v);
+  else if(VIEWN==="clients")renderClients(v);
+  else if(VIEWN==="deadlines")renderDeadlines(v);
+  else renderMore(v);
 }
-function card(tab,o){
-  const title=o[TITLECOL[tab]]||"—";
-  const sub=SUBCOL[tab]&&o[SUBCOL[tab]]&&SUBCOL[tab]!==TITLECOL[tab]?'<div class="sub">'+esc(o[SUBCOL[tab]])+"</div>":"";
-  const rows=FIELDS[tab].map(f=>{
-    const key=f[0],label=f[1],secret=f[2],val=o[key];
-    if(val==null||val==="")return "";
-    let vhtml;
-    if(secret){
-      if(val==="•••"){
-        vhtml='<button class="reveal" data-rev="'+esc(tab)+"|"+esc(key)+'">reveal</button>';
-      }else{
-        vhtml=esc(val); // already a plain value (public) — rare for secret cols
-      }
-    }else{
-      vhtml=esc(val)+' <button class="copy" data-copy="'+esc(val)+'" title="copy">⧉</button>';
-    }
-    return '<div class="k">'+esc(label)+'</div><div class="v" data-cell="'+esc(key)+'">'+vhtml+"</div>";
-  }).join("");
-  return '<div class="card" data-key="'+esc(JSON.stringify(keyOf(tab,o)))+'"><h3>'+esc(title)+"</h3>"+sub+'<div class="kv">'+rows+"</div></div>";
+function renderSkeleton(){$("#view").innerHTML='<div class="skel" style="margin-top:14px"></div><div class="skel" style="margin-top:12px"></div>'}
+
+function clientRow(c){
+  const nd=nextDue(c);
+  const pill=nd?'<span class="pill '+dueClass(nd.days,nd.o)+'">'+esc(nd.t)+" "+esc(nd.s)+"</span>":"";
+  return '<div class="row" data-open="'+esc(c.k)+'"><div class="avatar">'+esc(initials(c.name))+'</div>'+
+    '<div class="rmain"><div class="rname">'+esc(c.name)+'</div><div class="rsub">'+esc(c.no?("#"+c.no):"")+
+    (c.c&&c.c.contact?" · "+esc(c.c.contact):"")+"</div></div>"+pill+'<span class="chev">›</span></div>';
 }
-function keyOf(tab,o){
-  if(tab==="Companies")return {company:o.company};
-  if(tab==="PersonalCodes")return {person:o.person,company:o.company};
-  if(tab==="Logins")return {system:o.system,entity:o.entity};
-  return {};
+
+function searchResults(){
+  const q=Q.toLowerCase();
+  const cs=IDX.clients.filter(c=>
+    c.name.toLowerCase().includes(q)||c.no.includes(q.replace(/\D/g,"")&&q.replace(/\D/g,""))||
+    (c.c&&((c.c.contact||"").toLowerCase().includes(q)||(c.c.vatNo||"").toLowerCase().includes(q)||(c.c.email||"").toLowerCase().includes(q)))
+  ).slice(0,40);
+  const ps=IDX.people.filter(p=>p.person.toLowerCase().includes(q)).slice(0,12);
+  let h="";
+  if(cs.length){h+='<div class="section"><h2>Clients</h2></div><div class="card rowlist">'+cs.map(clientRow).join("")+"</div>"}
+  if(ps.length){h+='<div class="section"><h2>People</h2></div><div class="card rowlist">'+ps.map(p=>{
+    const comps=[...new Set(p.entries.map(e=>e.company).filter(Boolean))];
+    return '<div class="row" data-person="'+esc(p.person)+'"><div class="avatar">'+esc(initials(p.person))+'</div><div class="rmain"><div class="rname">'+esc(p.person)+'</div><div class="rsub">'+esc(comps.slice(0,2).join(" · "))+'</div></div><span class="pill gold">personal code</span><span class="chev">›</span></div>';
+  }).join("")+"</div>"}
+  return h||'<div class="empty"><span class="big">🤷</span>No matches for “'+esc(Q)+'”</div>';
 }
-function wireCards(){
-  document.querySelectorAll(".copy").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);toast("Copied")});
-  document.querySelectorAll(".reveal").forEach(b=>b.onclick=async()=>{
-    const [tab,field]=b.dataset.rev.split("|");
-    const cardEl=b.closest(".card");
-    const match=JSON.parse(cardEl.dataset.key);
+
+function renderHome(v){
+  if(Q){v.innerHTML=searchResults();wire(v);return}
+  const withDue=IDX.clients.map(c=>({c,nd:nextDue(c)})).filter(x=>x.nd&&x.nd.days!=null);
+  const overdue=withDue.filter(x=>x.nd.o||x.nd.days<0);
+  const soon=withDue.filter(x=>!x.nd.o&&x.nd.days>=0&&x.nd.days<=31).sort((a,b)=>a.nd.days-b.nd.days);
+  const recent=(loadJ(RECENT_KEY,[])).map(k=>IDX.byKey.get(k)).filter(Boolean);
+  let h='<div class="tiles">'+
+    '<div class="tile" data-nav="clients"><b>'+IDX.clients.length+'</b><span>clients</span></div>'+
+    '<div class="tile'+(overdue.length?" warn":"")+'" data-nav="deadlines" data-f="overdue"><b>'+overdue.length+'</b><span>overdue</span></div>'+
+    '<div class="tile" data-nav="deadlines"><b>'+soon.length+'</b><span>due ≤ 31 days</span></div></div>';
+  if(overdue.length){
+    h+='<div class="section"><h2>⚠️ Overdue at Companies House</h2><button class="more" data-nav="deadlines" data-f="overdue">See all</button></div>'+
+       '<div class="card rowlist">'+overdue.slice(0,4).map(x=>clientRow(x.c)).join("")+"</div>";
+  }
+  h+='<div class="section"><h2>Coming up</h2><button class="more" data-nav="deadlines">All deadlines</button></div>';
+  h+=soon.length?'<div class="card rowlist">'+soon.slice(0,6).map(x=>clientRow(x.c)).join("")+"</div>"
+    :'<div class="card"><div class="empty" style="padding:26px">Nothing due in the next month 🎉</div></div>';
+  if(recent.length){h+='<div class="section"><h2>Recently viewed</h2></div><div class="card rowlist">'+recent.map(clientRow).join("")+"</div>"}
+  h+='<div class="srcnote" style="padding:14px 4px 0">Deadlines come live from Companies House'+(chRefreshed()?" · refreshed "+esc(chRefreshed()):"")+' · client data synced '+esc(STATE.lastSync||"")+'</div>';
+  v.innerHTML=h;wire(v);
+}
+
+function renderClients(v){
+  if(Q){v.innerHTML=searchResults();wire(v);return}
+  let h="",letter="";
+  h+='<div class="card rowlist">';
+  IDX.clients.forEach(c=>{
+    const L=(c.name[0]||"#").toUpperCase();
+    if(L!==letter){letter=L;h+='</div><div class="gletter">'+esc(L)+'</div><div class="card rowlist">'}
+    h+=clientRow(c);
+  });
+  h+="</div>";
+  v.innerHTML=h.replace('<div class="card rowlist"></div>',"");wire(v);
+}
+
+function renderDeadlines(v){
+  const rows=IDX.clients.map(c=>({c,dl:c.dl})).filter(x=>x.dl&&x.dl.status==="active");
+  const items=[];
+  rows.forEach(({c,dl})=>{
+    if(dl.accountsDue)items.push({c,type:"Accounts",due:dl.accountsDue,days:daysTo(dl.accountsDue),o:dl.accountsOverdue==="yes",sub:"made up to "+(dl.accountsMadeUpTo||"—")});
+    if(dl.csDue)items.push({c,type:"Confirmation statement",due:dl.csDue,days:daysTo(dl.csDue),o:dl.csOverdue==="yes",sub:"statement date "+(dl.csMadeUpTo||"—")});
+  });
+  let f=items;
+  if(DLFILTER==="overdue")f=items.filter(i=>i.o||i.days<0);
+  else if(DLFILTER==="soon")f=items.filter(i=>i.days!=null&&i.days<=60&&i.days>=0||i.o||i.days<0);
+  else if(DLFILTER==="acc")f=items.filter(i=>i.type==="Accounts");
+  else if(DLFILTER==="cs")f=items.filter(i=>i.type!=="Accounts");
+  f.sort((a,b)=>(a.days??9e9)-(b.days??9e9));
+  const fb=(id,label)=>'<button class="fbtn'+(DLFILTER===id?" on":"")+'" data-dlf="'+id+'">'+label+"</button>";
+  let h='<div class="filters" style="margin-top:10px">'+fb("soon","Next 60 days")+fb("overdue","Overdue")+fb("acc","Accounts")+fb("cs","Conf. statements")+fb("all","All")+"</div>";
+  h+=f.length?'<div class="card rowlist">'+f.slice(0,200).map(i=>{
+    const cls=dueClass(i.days,i.o),note=dueNote(i.days,i.o);
+    return '<div class="row" data-open="'+esc(i.c.k)+'"><div class="avatar">'+esc(initials(i.c.name))+'</div>'+
+      '<div class="rmain"><div class="rname">'+esc(i.c.name)+'</div><div class="rsub">'+esc(i.type)+' · '+esc(i.sub)+'</div></div>'+
+      '<span class="pill '+cls+'">'+esc(i.due)+(note?" · "+esc(note):"")+"</span><span class=\"chev\">›</span></div>";
+  }).join("")+"</div>":'<div class="empty"><span class="big">🎉</span>Nothing here</div>';
+  h+='<div class="srcnote" style="padding:12px 4px 0">Live from Companies House'+(chRefreshed()?" · refreshed "+esc(chRefreshed()):"")+"</div>";
+  v.innerHTML=h;wire(v);
+}
+function chRefreshed(){const r=(STATE.data.Deadlines||[]).find(x=>x.chRefreshed);return r?r.chRefreshed:""}
+
+/* ---------- dossier ---------- */
+function canReveal(field){return STATE.role==="admin"||(STATE.staffReveal||[]).includes(field)}
+function factRow(label,val,opts){
+  opts=opts||{};
+  if(val==null||val==="")return"";
+  if(val==="•••"){
+    const ctl=canReveal(opts.field)
+      ?'<button class="reveal" data-rev=\''+esc(JSON.stringify(opts.rev))+'\'>Reveal</button>'
+      :'<span class="lockchip">🔒 admins only</span>';
+    return '<div class="fact"><div class="fl">'+esc(label)+'</div><div class="fv">•••••</div>'+ctl+"</div>";
+  }
+  return '<div class="fact"><div class="fl">'+esc(label)+'</div><div class="fv'+(opts.plain?" plain":"")+'">'+esc(val)+'</div>'+
+    '<button class="copy" data-copy="'+esc(val)+'">⧉</button></div>';
+}
+function renderDetail(v){
+  if(DETAIL.person)return renderPerson(v);
+  const c=IDX.byKey.get(DETAIL.k);if(!c){DETAIL=null;paint();return}
+  const r=c.c||{}, dl=c.dl;
+  let h='<button class="backbtn" id="back">‹ Back</button><div class="card" style="margin-top:10px">';
+  h+='<div class="dhead"><h2>'+esc(c.name)+'</h2><div class="meta">'+
+     (c.no?'<span class="mono">#'+esc(c.no)+'</span><button class="copy" data-copy="'+esc(c.no)+'" style="border:none;background:var(--chip);border-radius:7px;padding:3px 8px">⧉</button>':"")+
+     (dl&&dl.status?'<span class="pill '+(dl.status==="active"?"green":"red")+'">'+esc(dl.status)+"</span>":"")+
+     (r.incDate?'<span>since '+esc(r.incDate)+"</span>":"")+"</div></div>";
+  if(dl&&(dl.accountsDue||dl.csDue)){
+    h+='<div class="dueband">';
+    [["📊 Accounts due",dl.accountsDue,dl.accountsOverdue==="yes","made up to "+(dl.accountsMadeUpTo||"—")],
+     ["📄 Conf. statement",dl.csDue,dl.csOverdue==="yes","statement date "+(dl.csMadeUpTo||"—")]].forEach(([lab,due,o,sub])=>{
+      if(!due)return;
+      const days=daysTo(due),cls=dueClass(days,o),note=dueNote(days,o);
+      h+='<div class="duecard '+cls+'"><div class="dl">'+lab+'</div><div class="dv">'+esc(due)+'</div><div class="dn">'+esc(sub)+(note?" · <b>"+esc(note)+"</b>":"")+"</div></div>";
+    });
+    h+='</div><div class="srcnote">Live from Companies House · refreshed '+esc(dl.chRefreshed||"")+"</div>";
+  }
+  h+='<div class="dsec">';
+  h+='<h3>Company details</h3>';
+  h+=factRow("Contact",r.contact,{plain:1})+factRow("UTR",r.utr)+factRow("VAT number",r.vatNo)+
+     factRow("Email",r.email)+factRow("Phone",r.phone)+factRow("Address",r.address,{plain:1});
+  const m={company:c.name};
+  const secrets=factRow("CH auth code",r.authCode,{field:"authCode",rev:{tab:"Companies",match:m,field:"authCode"}})+
+    factRow("Gateway ID",r.ggId,{field:"ggId",rev:{tab:"Companies",match:m,field:"ggId"}})+
+    factRow("GG password",r.ggPassword,{field:"ggPassword",rev:{tab:"Companies",match:m,field:"ggPassword"}})+
+    factRow("NI number",r.ni,{field:"ni",rev:{tab:"Companies",match:m,field:"ni"}})+
+    factRow("Date of birth",r.dob,{field:"dob",rev:{tab:"Companies",match:m,field:"dob"}});
+  if(secrets)h+='<h3>Codes & logins</h3>'+secrets;
+  c.logins.forEach(l=>{
+    const lm={system:l.system,entity:l.entity};
+    h+='<h3>'+esc(l.system)+'</h3>'+
+      factRow("Username",l.username,{field:"username",rev:{tab:"Logins",match:lm,field:"username"}})+
+      factRow("Password",l.password,{field:"password",rev:{tab:"Logins",match:lm,field:"password"}})+
+      factRow("Email",l.email)+factRow("Phone",l.phone)+factRow("Notes",l.notes,{plain:1});
+  });
+  if(c.codes.length){
+    h+='<h3>Personal codes (Companies House ID)</h3>';
+    c.codes.forEach(pc=>{
+      const pm={person:pc.person,company:pc.company};
+      h+='<div class="fact"><div class="fl">'+esc(pc.person)+'</div><div class="fv">'+
+        (pc.personalCode==="•••"?"•••••":esc(pc.personalCode||"—"))+"</div>"+
+        (pc.personalCode==="•••"?(canReveal("personalCode")?'<button class="reveal" data-rev=\''+esc(JSON.stringify({tab:"PersonalCodes",match:pm,field:"personalCode"}))+'\'>Reveal</button>':'<span class="lockchip">🔒 admins only</span>'):"")+"</div>";
+      if(pc.verifiedOn)h+='<div class="srcnote" style="padding:0 0 6px">verified '+esc(pc.verifiedOn)+(pc.invoiced?" · invoiced "+esc(pc.invoiced):"")+"</div>";
+    });
+  }
+  if(c.pension.length){
+    h+='<h3>Pension (NEST)</h3>';
+    c.pension.forEach(p=>{
+      h+=factRow("PAYE ref",p.payeRef)+factRow("NEST employer ID",p.nestEmployerId)+factRow("Letter code",p.letterCode)+
+         factRow("Staging date",p.stagingDate)+factRow("Declaration by",p.completeBy)+factRow("Completed",p.completed,{plain:1});
+    });
+  }
+  h+="</div></div>";
+  v.innerHTML=h;wire(v);
+}
+function renderPerson(v){
+  const p=IDX.people.find(x=>x.person===DETAIL.person);
+  if(!p){DETAIL=null;paint();return}
+  let h='<button class="backbtn" id="back">‹ Back</button><div class="card" style="margin-top:10px">'+
+    '<div class="dhead"><h2>'+esc(p.person)+'</h2><div class="meta"><span class="pill gold">CH personal code holder</span></div></div><div class="dsec">';
+  p.entries.forEach(pc=>{
+    const pm={person:pc.person,company:pc.company};
+    h+='<h3>'+esc(pc.company||"—")+'</h3>'+
+      '<div class="fact"><div class="fl">Personal code</div><div class="fv">'+(pc.personalCode==="•••"?"•••••":esc(pc.personalCode||"—"))+"</div>"+
+      (pc.personalCode==="•••"?(canReveal("personalCode")?'<button class="reveal" data-rev=\''+esc(JSON.stringify({tab:"PersonalCodes",match:pm,field:"personalCode"}))+'\'>Reveal</button>':'<span class="lockchip">🔒 admins only</span>'):"")+"</div>"+
+      factRow("Verified on",pc.verifiedOn)+factRow("Email",pc.email);
+  });
+  h+="</div></div>";
+  v.innerHTML=h;wire(v);
+}
+
+/* ---------- more ---------- */
+function renderMore(v){
+  let h='<div class="section"><h2>Reference sheets</h2></div><div class="card">';
+  const misc=STATE.misc||{};
+  Object.keys(misc).forEach((tab,i)=>{
+    h+='<div class="acc" data-acc="'+i+'"><button>📄 '+esc(tab)+'<span class="chev">›</span></button><div class="accbody"><table class="misc">'+
+      misc[tab].map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table></div></div>";
+  });
+  h+="</div>";
+  if(STATE.miscSecret&&STATE.miscSecret.length){
+    h+='<div class="section"><h2>Credential sheets (admin)</h2></div><div class="card" style="padding-top:12px">';
+    STATE.miscSecret.forEach(msec=>{
+      h+='<div class="locked"><span>🔒 <b>'+esc(msec.tab)+'</b> · '+msec.rows+' rows</span><button class="btn" style="padding:7px 13px" data-misc="'+esc(msec.tab)+'">Open</button></div>';
+    });
+    h+="</div>";
+  }
+  h+='<div class="section"><h2>This device</h2></div><div class="card" style="padding:14px 16px;font-size:14px">'+
+    'Signed in as <b>'+esc(STATE.me)+'</b> <span class="badge '+(STATE.role==="admin"?"admin":"")+'">'+esc(STATE.role)+'</span>'+
+    '<div style="color:var(--mut);font-size:13px;margin-top:6px">Client data synced '+esc(STATE.lastSync||"—")+
+    (chRefreshed()?" · CH deadlines refreshed "+esc(chRefreshed()):"")+
+    '</div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'+
+    '<button class="btn" id="reloadBtn">↻ Reload</button><button class="btn" id="reconnBtn">Change code</button></div>'+
+    '<div style="color:var(--mut);font-size:12px;margin-top:12px">Every reveal of a code or password is logged with your name. Codes and passwords are never stored on this device.</div></div>';
+  v.innerHTML=h;wire(v);
+}
+
+/* ---------- wiring ---------- */
+function openClient(k){
+  DETAIL={k};
+  const rec=loadJ(RECENT_KEY,[]).filter(x=>x!==k);rec.unshift(k);saveJ(RECENT_KEY,rec.slice(0,6));
+  window.scrollTo(0,0);paint();
+}
+function wire(v){
+  v.querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>openClient(el.dataset.open));
+  v.querySelectorAll("[data-person]").forEach(el=>el.onclick=()=>{DETAIL={person:el.dataset.person};window.scrollTo(0,0);paint()});
+  v.querySelectorAll("[data-nav]").forEach(el=>el.onclick=()=>{VIEWN=el.dataset.nav;DETAIL=null;if(el.dataset.f)DLFILTER=el.dataset.f;paint()});
+  v.querySelectorAll("[data-dlf]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlf;paint()});
+  v.querySelectorAll("[data-copy]").forEach(b=>b.onclick=e=>{e.stopPropagation();copyTxt(b.dataset.copy)});
+  const back=v.querySelector("#back");if(back)back.onclick=()=>{DETAIL=null;paint()};
+  v.querySelectorAll("[data-acc]").forEach(a=>{a.querySelector("button").onclick=()=>a.classList.toggle("open")});
+  v.querySelectorAll("[data-rev]").forEach(b=>b.onclick=async e=>{
+    e.stopPropagation();
+    const q=JSON.parse(b.dataset.rev);
     b.textContent="…";b.disabled=true;
     try{
-      const j=await api("reveal",{tab,match,field});
-      const cell=b.closest(".v");
-      cell.innerHTML='<span class="revealed">'+esc(j.value)+'</span> <button class="copy" data-copy="'+esc(j.value)+'">⧉</button> <button class="reveal" data-hide="1">hide</button>';
-      wireCards();
-    }catch(e){b.textContent="reveal";b.disabled=false;toast(e.message||"failed")}
+      const j=await api("reveal",q);
+      const cell=b.closest(".fact").querySelector(".fv");
+      cell.innerHTML='<span class="revealed">'+esc(j.value)+"</span>";
+      const cp=document.createElement("button");cp.className="copy";cp.textContent="⧉";cp.onclick=()=>copyTxt(j.value);
+      b.replaceWith(cp);
+      setTimeout(()=>{if(cell.isConnected){cell.textContent="•••••";cp.remove();toast("Hidden again")}},45000);
+    }catch(err){b.textContent="Reveal";b.disabled=false;toast(err.message||"Failed")}
   });
-  document.querySelectorAll("[data-hide]").forEach(b=>b.onclick=()=>render());
-}
-function renderOther(v){
-  let html="";
-  const misc=STATE.misc||{};
-  Object.keys(misc).forEach(tab=>{
-    const grid=misc[tab].filter(r=>!Q||r.join(" ").toLowerCase().includes(Q));
-    if(!grid.length)return;
-    html+='<div class="miscblock"><h4>'+esc(tab)+'</h4><table class="misc">'+
-      grid.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table></div>";
-  });
-  (STATE.miscSecret||[]).forEach(m=>{
-    html+='<div class="locked"><span>🔒 <b>'+esc(m.tab)+'</b> — '+m.rows+' rows of credentials (admin only)</span><button class="btn sm" data-misc="'+esc(m.tab)+'">Reveal</button></div>';
-  });
-  v.innerHTML=html||'<div class="empty">No other sheets.</div>';
-  document.querySelectorAll("[data-misc]").forEach(b=>b.onclick=async()=>{
+  v.querySelectorAll("[data-misc]").forEach(b=>b.onclick=async()=>{
     b.textContent="…";b.disabled=true;
     try{
       const j=await api("revealMisc",{tab:b.dataset.misc});
-      const block='<div class="miscblock"><h4>'+esc(b.dataset.misc)+' <span class="muted">(revealed)</span></h4><table class="misc">'+
-        j.rows.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table></div>";
-      b.closest(".locked").outerHTML=block;
-    }catch(e){b.textContent="Reveal";b.disabled=false;toast(e.message||"failed")}
+      const div=document.createElement("div");div.className="accbody";div.style.display="block";div.style.padding="0 16px 14px";
+      div.innerHTML='<table class="misc">'+j.rows.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table>";
+      b.closest(".locked").after(div);b.textContent="Open";b.disabled=false;
+    }catch(err){b.textContent="Open";b.disabled=false;toast(err.message||"Failed")}
   });
+  const rl=v.querySelector("#reloadBtn");if(rl)rl.onclick=()=>connect(true);
+  const rc=v.querySelector("#reconnBtn");if(rc)rc.onclick=()=>showConnect();
 }
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{VIEWN=b.dataset.v;DETAIL=null;Q="";$("#q").value="";$("#qclear").style.display="none";window.scrollTo(0,0);paint()});
+
+/* ---------- search ---------- */
+let qt;
+$("#q").addEventListener("input",e=>{
+  clearTimeout(qt);
+  qt=setTimeout(()=>{Q=e.target.value.trim();$("#qclear").style.display=Q?"block":"none";if(DETAIL)DETAIL=null;paint()},110);
+});
+$("#qclear").onclick=()=>{Q="";$("#q").value="";$("#qclear").style.display="none";paint()};
 
 /* ---------- connect modal ---------- */
 function showConnect(msg){
-  $("#mMsg").textContent=msg||"Paste the web-app URL and your personal access code. Both are stored on this device only.";
-  $("#mUrl").value=CFG.url||DEFAULT_API_URL||"";
+  $("#mMsg").textContent=msg||"Paste your personal access code (from your invite link). It stays on this device only.";
+  $("#mUrl").value=CFG.url||DEFAULT_API_URL;
   $("#mCode").value=CFG.code||"";
   $("#scrim").classList.add("on");
 }
 function closeConnect(){$("#scrim").classList.remove("on")}
 $("#mCancel").onclick=closeConnect;
-$("#gear").onclick=()=>showConnect();
 $("#mConnect").onclick=()=>{
-  CFG.url=$("#mUrl").value.trim();CFG.code=$("#mCode").value.trim();
-  if(!CFG.url||!CFG.code){toast("URL and code required");return}
-  saveCfg();connect(true);
+  CFG.code=$("#mCode").value.trim();
+  CFG.url=($("#mUrl").value.trim())||DEFAULT_API_URL;
+  if(!CFG.code){toast("Access code needed");return}
+  saveJ(CFG_KEY,CFG);connect(true);
 };
 
-/* ---------- theme + search + boot ---------- */
-function initTheme(){const s=localStorage.getItem(THEME_KEY);if(s)document.documentElement.setAttribute("data-theme",s);
-  $("#themeBtn").onclick=()=>{const cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
-    const nx=cur==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",nx);localStorage.setItem(THEME_KEY,nx)}}
-let qt;$("#q").addEventListener("input",e=>{clearTimeout(qt);qt=setTimeout(()=>{Q=e.target.value.trim().toLowerCase();render()},120)});
-
+/* ---------- theme + boot ---------- */
+$("#themeBtn").onclick=()=>{
+  const cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  const nx=cur==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",nx);localStorage.setItem(THEME_KEY,nx);
+};
 (function boot(){
-  initTheme();
+  const s=localStorage.getItem(THEME_KEY);if(s)document.documentElement.setAttribute("data-theme",s);
   const p=new URLSearchParams(location.search);
-  const k=p.get("k"),url=p.get("u");
-  if(k){CFG.code=k;if(url)CFG.url=url;else if(DEFAULT_API_URL)CFG.url=DEFAULT_API_URL;saveCfg();
-    history.replaceState({},"",location.pathname);}
-  if(CFG.url&&CFG.code){connect(false);}
-  else showConnect();
+  if(p.get("k")){CFG.code=p.get("k");CFG.url=p.get("u")||DEFAULT_API_URL;saveJ(CFG_KEY,CFG);history.replaceState({},"",location.pathname)}
+  if(CFG.code)connect(false);else showConnect();
 })();
 </script>
