@@ -277,6 +277,13 @@ function buildIndex(){
   list.sort((a,b)=>a.name.localeCompare(b.name));
   IDX={clients:list,byKey:new Map(list.map(c=>[c.k,c])),people:[...people.values()]};
 }
+const SRC_LABEL={accounts:"Accounts",vat:"VAT",credential:"Credentials only"};
+const SRC_CLS={accounts:"green",vat:"amber",credential:"gold"};
+function sourceTags(sources){
+  if(!sources)return"";
+  return String(sources).split(",").filter(Boolean).map(s=>
+    '<span class="pill '+(SRC_CLS[s]||"")+'">'+esc(SRC_LABEL[s]||s)+"</span>").join("");
+}
 function nextDue(c){
   if(!c.dl)return null;
   const cand=[["Accounts",c.dl.accountsDue,c.dl.accountsOverdue],["CS",c.dl.csDue,c.dl.csOverdue]]
@@ -408,6 +415,7 @@ function renderDetail(v){
   h+='<div class="dhead"><h2>'+esc(c.name)+'</h2><div class="meta">'+
      (c.no?'<span class="mono">#'+esc(c.no)+'</span><button class="copy" data-copy="'+esc(c.no)+'" style="border:none;background:var(--chip);border-radius:7px;padding:3px 8px">⧉</button>':"")+
      (dl&&dl.status?'<span class="pill '+(dl.status==="active"?"green":"red")+'">'+esc(dl.status)+"</span>":"")+
+     sourceTags(r.sources)+
      (r.incDate?'<span>since '+esc(r.incDate)+"</span>":"")+"</div></div>";
   if(dl&&(dl.accountsDue||dl.csDue)){
     h+='<div class="dueband">';
