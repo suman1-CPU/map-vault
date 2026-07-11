@@ -154,7 +154,7 @@ table.misc td{border:1px solid var(--line);padding:6px 9px;vertical-align:top;fo
 @keyframes sh{to{background-position:-200% 0}}
 .conn{width:9px;height:9px;border-radius:50%;background:var(--mut);flex:0 0 auto}
 .conn.ok{background:var(--green)} .conn.err{background:var(--red)}
-.gletter{position:sticky;top:calc(118px + env(safe-area-inset-top));font-size:12px;font-weight:800;color:var(--mut);padding:10px 4px 4px;background:var(--bg);z-index:5}
+.gletter{position:sticky;top:calc(130px + env(safe-area-inset-top));font-size:12px;font-weight:800;color:var(--mut);padding:10px 4px 4px;background:var(--bg);z-index:5}
 </style>
 
 <header>
@@ -206,7 +206,7 @@ let CFG=loadJ(CFG_KEY,{}), STATE=null, IDX=null, VIEWN="home", DETAIL=null, Q=""
 function $(s){return document.querySelector(s)}
 function loadJ(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
 function saveJ(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),1900)}
 function setConn(s){$("#conn").className="conn"+(s?" "+s:"")}
 function copyTxt(v){navigator.clipboard.writeText(v).then(()=>toast("Copied"),()=>toast("Copy failed"))}
@@ -259,15 +259,20 @@ function buildIndex(){
   }
   (d.Companies||[]).forEach(r=>{const c=client(r.companyNo,r.company||r.contact);c.c=r;if(r.company)c.name=r.company});
   (d.Deadlines||[]).forEach(r=>{const c=client(r.companyNo,r.company);c.dl=r;if(!c.name)c.name=r.company});
-  const byName=new Map();clients.forEach(c=>{const n=normName(c.name);if(n&&!byName.has(n))byName.set(n,c)});
-  (d.Logins||[]).forEach(r=>{const c=byName.get(normName(r.entity));if(c)c.logins.push(r);else{const nc=client("",r.entity);nc.logins.push(nc&&r)}});
+  // normName strips ltd/llp/plc, so two entities differing only by suffix share a key.
+  // Attach related rows to ALL clients sharing the key (never silently to the wrong one)
+  // and warn, rather than first-wins misattribution.
+  const byName=new Map();clients.forEach(c=>{const n=normName(c.name);if(n){if(!byName.has(n))byName.set(n,[]);byName.get(n).push(c)}});
+  byName.forEach((arr,n)=>{if(arr.length>1)console.warn("MAP Vault: "+arr.length+" clients share normalised name "+JSON.stringify(n)+" — related rows attached to all; disambiguate in the sheet")});
+  const fanout=name=>byName.get(normName(name))||[];
+  (d.Logins||[]).forEach(r=>{const cs=fanout(r.entity);if(cs.length)cs.forEach(c=>c.logins.push(r));else client("",r.entity).logins.push(r)});
   (d.PersonalCodes||[]).forEach(r=>{
-    const c=byName.get(normName(r.company));if(c)c.codes.push(r);
+    fanout(r.company).forEach(c=>c.codes.push(r));
     const pk=r.person.trim().toLowerCase();
     if(!people.has(pk))people.set(pk,{person:r.person,entries:[]});
     people.get(pk).entries.push(r);
   });
-  (d.Pensions||[]).forEach(r=>{const c=byName.get(normName(r.employer));if(c)c.pension.push(r)});
+  (d.Pensions||[]).forEach(r=>{fanout(r.employer).forEach(c=>c.pension.push(r))});
   const list=[...clients.values()].filter(c=>c.name);
   list.sort((a,b)=>a.name.localeCompare(b.name));
   IDX={clients:list,byKey:new Map(list.map(c=>[c.k,c])),people:[...people.values()]};
@@ -305,8 +310,9 @@ function clientRow(c){
 
 function searchResults(){
   const q=Q.toLowerCase();
+  const qd=q.replace(/\D/g,"");
   const cs=IDX.clients.filter(c=>
-    c.name.toLowerCase().includes(q)||c.no.includes(q.replace(/\D/g,"")&&q.replace(/\D/g,""))||
+    c.name.toLowerCase().includes(q)||(qd&&c.no.includes(qd))||
     (c.c&&((c.c.contact||"").toLowerCase().includes(q)||(c.c.vatNo||"").toLowerCase().includes(q)||(c.c.email||"").toLowerCase().includes(q)))
   ).slice(0,40);
   const ps=IDX.people.filter(p=>p.person.toLowerCase().includes(q)).slice(0,12);
@@ -417,7 +423,7 @@ function renderDetail(v){
   h+='<h3>Company details</h3>';
   h+=factRow("Contact",r.contact,{plain:1})+factRow("UTR",r.utr)+factRow("VAT number",r.vatNo)+
      factRow("Email",r.email)+factRow("Phone",r.phone)+factRow("Address",r.address,{plain:1});
-  const m={company:c.name};
+  const m=c.no?{companyNo:c.no}:{company:c.name};
   const secrets=factRow("CH auth code",r.authCode,{field:"authCode",rev:{tab:"Companies",match:m,field:"authCode"}})+
     factRow("Gateway ID",r.ggId,{field:"ggId",rev:{tab:"Companies",match:m,field:"ggId"}})+
     factRow("GG password",r.ggPassword,{field:"ggPassword",rev:{tab:"Companies",match:m,field:"ggPassword"}})+
@@ -509,15 +515,15 @@ function wire(v){
   v.querySelectorAll("[data-acc]").forEach(a=>{a.querySelector("button").onclick=()=>a.classList.toggle("open")});
   v.querySelectorAll("[data-rev]").forEach(b=>b.onclick=async e=>{
     e.stopPropagation();
-    const q=JSON.parse(b.dataset.rev);
     b.textContent="…";b.disabled=true;
     try{
+      const q=JSON.parse(b.dataset.rev);
       const j=await api("reveal",q);
       const cell=b.closest(".fact").querySelector(".fv");
       cell.innerHTML='<span class="revealed">'+esc(j.value)+"</span>";
       const cp=document.createElement("button");cp.className="copy";cp.textContent="⧉";cp.onclick=()=>copyTxt(j.value);
       b.replaceWith(cp);
-      setTimeout(()=>{if(cell.isConnected){cell.textContent="•••••";cp.remove();toast("Hidden again")}},45000);
+      setTimeout(()=>{if(!cell.isConnected)return;cell.textContent="•••••";b.textContent="Reveal";b.disabled=false;cp.replaceWith(b);toast("Hidden again")},45000);
     }catch(err){b.textContent="Reveal";b.disabled=false;toast(err.message||"Failed")}
   });
   v.querySelectorAll("[data-misc]").forEach(b=>b.onclick=async()=>{
@@ -526,7 +532,7 @@ function wire(v){
       const j=await api("revealMisc",{tab:b.dataset.misc});
       const div=document.createElement("div");div.className="accbody";div.style.display="block";div.style.padding="0 16px 14px";
       div.innerHTML='<table class="misc">'+j.rows.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table>";
-      b.closest(".locked").after(div);b.textContent="Open";b.disabled=false;
+      b.closest(".locked").after(div);b.remove();
     }catch(err){b.textContent="Open";b.disabled=false;toast(err.message||"Failed")}
   });
   const rl=v.querySelector("#reloadBtn");if(rl)rl.onclick=()=>connect(true);
