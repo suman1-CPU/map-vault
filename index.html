@@ -1,0 +1,289 @@
+<title>MAP Vault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --ink:#14181f; --mut:#5b6572; --line:#e3e7ec;
+  --accent:#2f6df6; --accent-ink:#fff; --chip:#eef2f7; --danger:#c0392b;
+  --secret:#8a6d00; --secretbg:#fff7dd; --ok:#137a3f; --shadow:0 1px 2px rgba(20,24,31,.06),0 4px 16px rgba(20,24,31,.06);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1115; --card:#171b22; --ink:#e7ebf0; --mut:#9aa4b2; --line:#262c36;
+  --accent:#4f8bff; --chip:#20262f; --secret:#e8c65a; --secretbg:#2a2410; --ok:#4cc57e; --danger:#ff6b5e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+}}
+:root[data-theme="light"]{--bg:#f6f7f9;--card:#fff;--ink:#14181f;--mut:#5b6572;--line:#e3e7ec;--chip:#eef2f7;--secret:#8a6d00;--secretbg:#fff7dd;--ok:#137a3f;--danger:#c0392b;}
+:root[data-theme="dark"]{--bg:#0f1115;--card:#171b22;--ink:#e7ebf0;--mut:#9aa4b2;--line:#262c36;--accent:#4f8bff;--chip:#20262f;--secret:#e8c65a;--secretbg:#2a2410;--ok:#4cc57e;--danger:#ff6b5e;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
+header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--mono);font-weight:700;background:var(--accent);color:var(--accent-ink);padding:3px 8px;border-radius:6px;font-size:13px;letter-spacing:.5px}
+h1{font-size:16px;margin:0;font-weight:650}
+.grow{flex:1}
+.who{font-size:13px;color:var(--mut)}
+.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--chip);color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.badge.admin{background:var(--accent);color:var(--accent-ink)}
+.search{width:100%;max-width:520px}
+input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 12px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+.wrap{max-width:1100px;margin:0 auto;padding:14px 16px 80px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.tab{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:20px;padding:6px 13px;font-size:13px;font-weight:600}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.count{font-size:11px;opacity:.7;margin-left:5px}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 2px;font-size:15px;font-weight:650}
+.card .sub{color:var(--mut);font-size:12px;margin-bottom:10px;font-family:var(--mono)}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13.5px;align-items:baseline}
+.kv .k{color:var(--mut);font-size:12px}
+.kv .v{font-family:var(--mono);word-break:break-word}
+.kv .v.blank{color:var(--mut);font-family:var(--sans);font-style:italic;opacity:.6}
+.reveal{cursor:pointer;border:1px solid var(--line);background:var(--secretbg);color:var(--secret);border-radius:7px;padding:1px 8px;font-size:12px;font-weight:600;font-family:var(--sans)}
+.reveal:hover{filter:brightness(.97)}
+.revealed{color:var(--secret);background:var(--secretbg);padding:1px 6px;border-radius:6px}
+.copy{cursor:pointer;border:none;background:none;color:var(--mut);font-size:12px;padding:0 4px}
+.copy:hover{color:var(--accent)}
+.muted{color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:60px 20px}
+.btn{cursor:pointer;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 14px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.iconbtn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;width:36px;height:36px;font-size:15px}
+.scrim{position:fixed;inset:0;background:rgba(10,12,16,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.scrim.on{display:flex}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:440px;width:100%;box-shadow:var(--shadow)}
+.modal h2{margin:0 0 4px;font-size:18px}
+.modal p{color:var(--mut);font-size:13px;margin:0 0 16px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:5px}
+.field input{width:100%}
+.conn{width:9px;height:9px;border-radius:50%;background:var(--mut);display:inline-block}
+.conn.ok{background:var(--ok)} .conn.err{background:var(--danger)} .conn.demo{background:var(--secret)}
+table.misc{width:100%;border-collapse:collapse;font-size:13px}
+table.misc td{border:1px solid var(--line);padding:5px 8px;vertical-align:top;font-family:var(--mono)}
+table.misc tr:first-child td{background:var(--chip);font-family:var(--sans);font-weight:600}
+.miscblock{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;overflow-x:auto}
+.miscblock h4{margin:0 0 8px;font-size:14px}
+.locked{border:1px dashed var(--line);border-radius:10px;padding:10px;color:var(--secret);background:var(--secretbg);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+
+<header>
+  <span class="logo">VAULT</span>
+  <h1>MAP Vault</h1>
+  <input class="search" id="q" placeholder="Search company, person, VAT no., login…">
+  <span class="grow"></span>
+  <span class="who" id="who"></span>
+  <span class="conn" id="conn" title="connection"></span>
+  <button class="iconbtn" id="themeBtn" title="Theme">◐</button>
+  <button class="iconbtn" id="gear" title="Connection">⚙</button>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+</div>
+
+<!-- CONNECT -->
+<div class="scrim" id="scrim">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="logo">VAULT</span><h2 id="mTitle">Connect to the vault</h2></div>
+    <p id="mMsg">Paste the web-app URL and your personal access code. Both are stored on this device only.</p>
+    <div class="field"><label>Web app URL</label><input id="mUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
+    <div class="field"><label>Your access code</label><input id="mCode" placeholder="personal code" autocomplete="off"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn" id="mCancel">Cancel</button>
+      <button class="btn primary" id="mConnect">Connect</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyopmm6e_aymCbnz3phNKU9Ag-9vaXf0nQVjnn3ukOukLqSJj6oPNy5veC2KuPKuuew/exec";
+const CFG_KEY="mapvault.cfg", THEME_KEY="mapvault.theme";
+let CFG=loadCfg(), STATE=null, TAB="Companies", Q="", DEMO=false;
+
+const FIELDS={
+  Companies:[["companyNo","Company no."],["contact","Contact"],["utr","UTR"],["vatNo","VAT no."],
+    ["authCode","CH auth code",1],["ggId","Gov Gateway ID",1],["ggPassword","GG password",1],
+    ["ni","NI number",1],["dob","Date of birth",1],["email","Email"],["phone","Phone"],
+    ["incDate","Incorporated"],["address","Address"]],
+  PersonalCodes:[["company","Company"],["personalCode","Personal code",1],["verifiedOn","Verified"],
+    ["doc1","Document 1",1],["doc2","Document 2",1],["invoiced","Invoiced"],["email","Email"]],
+  Logins:[["entity","Entity"],["username","Username / GG ID",1],["password","Password",1],
+    ["email","Email"],["phone","Phone"],["notes","Notes"]],
+  Pensions:[["stagingDate","Staging"],["deadline","Deadline"],["payeRef","PAYE ref"],["letterCode","Letter code"],
+    ["loggedInAs","Logged in as"],["nestEmployerId","NEST employer"],["nestDelegateId","NEST delegate"],
+    ["completeBy","Complete by"],["completed","Completed"]],
+  Deadlines:[["accountsDue","Accounts due"],["csMadeUpTo","CS made-up-to"],["csFileBy","CS file by"],
+    ["idvDue","IDV due"],["codesHeld","Codes held"]]
+};
+const TITLECOL={Companies:"company",PersonalCodes:"person",Logins:"system",Pensions:"employer",Deadlines:"company"};
+const SUBCOL={Companies:"company",Logins:"entity",PersonalCodes:"company"};
+
+function loadCfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY))||{}}catch(e){return{}}}
+function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(CFG))}catch(e){}}
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1800)}
+function setConn(s){const c=$("#conn");c.className="conn"+(s?" "+s:"")}
+
+async function api(op,payload){
+  const u=new URL(CFG.url);
+  u.searchParams.set("k",CFG.code);
+  if(op)u.searchParams.set("op",op);
+  if(payload)u.searchParams.set("payload",JSON.stringify(payload));
+  const r=await fetch(u.toString(),{method:"GET"});
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error||"error");
+  return j;
+}
+
+async function connect(announce){
+  try{
+    setConn();
+    const j=await api("",null);
+    STATE=j.state; DEMO=false; saveCfg();
+    closeConnect(); paint(); setConn("ok");
+    if(announce)toast("Connected — "+STATE.me+(STATE.role==="admin"?" (admin)":""));
+  }catch(e){
+    setConn("err");
+    showConnect("Could not connect: "+(e.message||e)+". Check the URL, your access code, and that the web app is deployed to “Anyone”.");
+  }
+}
+
+/* ---------- render ---------- */
+function paint(){
+  $("#who").innerHTML = STATE ? esc(STATE.me)+' <span class="badge '+(STATE.role==="admin"?"admin":"")+'">'+esc(STATE.role)+"</span>" : "";
+  renderTabs(); render();
+}
+function tabList(){
+  const t=["Companies","PersonalCodes","Logins","Pensions","Deadlines"];
+  if(STATE&&(Object.keys(STATE.misc||{}).length||(STATE.miscSecret&&STATE.miscSecret.length)))t.push("Other");
+  return t;
+}
+const TABLABEL={Companies:"Companies",PersonalCodes:"Personal codes",Logins:"Logins",Pensions:"Pensions",Deadlines:"Deadlines",Other:"Other sheets"};
+function renderTabs(){
+  $("#tabs").innerHTML=tabList().map(t=>{
+    const n=(STATE&&STATE.data&&STATE.data[t])?STATE.data[t].length:"";
+    return '<div class="tab'+(t===TAB?" on":"")+'" data-t="'+t+'">'+TABLABEL[t]+(n!==""?'<span class="count">'+n+"</span>":"")+"</div>";
+  }).join("");
+  document.querySelectorAll(".tab").forEach(el=>el.onclick=()=>{TAB=el.dataset.t;render();renderTabs()});
+}
+function matches(o){
+  if(!Q)return true;
+  return Object.keys(o).some(k=>String(o[k]||"").toLowerCase().includes(Q));
+}
+function render(){
+  const v=$("#view");
+  if(!STATE){v.innerHTML='<div class="empty">Not connected. Tap ⚙ to connect.</div>';return}
+  if(TAB==="Other")return renderOther(v);
+  const rows=(STATE.data[TAB]||[]).filter(matches);
+  if(!rows.length){v.innerHTML='<div class="empty">'+(Q?"No matches for “"+esc(Q)+"”.":"Nothing here yet.")+"</div>";return}
+  v.innerHTML='<div class="cards">'+rows.map(o=>card(TAB,o)).join("")+"</div>";
+  wireCards();
+}
+function card(tab,o){
+  const title=o[TITLECOL[tab]]||"—";
+  const sub=SUBCOL[tab]&&o[SUBCOL[tab]]&&SUBCOL[tab]!==TITLECOL[tab]?'<div class="sub">'+esc(o[SUBCOL[tab]])+"</div>":"";
+  const rows=FIELDS[tab].map(f=>{
+    const key=f[0],label=f[1],secret=f[2],val=o[key];
+    if(val==null||val==="")return "";
+    let vhtml;
+    if(secret){
+      if(val==="•••"){
+        vhtml='<button class="reveal" data-rev="'+esc(tab)+"|"+esc(key)+'">reveal</button>';
+      }else{
+        vhtml=esc(val); // already a plain value (public) — rare for secret cols
+      }
+    }else{
+      vhtml=esc(val)+' <button class="copy" data-copy="'+esc(val)+'" title="copy">⧉</button>';
+    }
+    return '<div class="k">'+esc(label)+'</div><div class="v" data-cell="'+esc(key)+'">'+vhtml+"</div>";
+  }).join("");
+  return '<div class="card" data-key="'+esc(JSON.stringify(keyOf(tab,o)))+'"><h3>'+esc(title)+"</h3>"+sub+'<div class="kv">'+rows+"</div></div>";
+}
+function keyOf(tab,o){
+  if(tab==="Companies")return {company:o.company};
+  if(tab==="PersonalCodes")return {person:o.person,company:o.company};
+  if(tab==="Logins")return {system:o.system,entity:o.entity};
+  return {};
+}
+function wireCards(){
+  document.querySelectorAll(".copy").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);toast("Copied")});
+  document.querySelectorAll(".reveal").forEach(b=>b.onclick=async()=>{
+    const [tab,field]=b.dataset.rev.split("|");
+    const cardEl=b.closest(".card");
+    const match=JSON.parse(cardEl.dataset.key);
+    b.textContent="…";b.disabled=true;
+    try{
+      const j=await api("reveal",{tab,match,field});
+      const cell=b.closest(".v");
+      cell.innerHTML='<span class="revealed">'+esc(j.value)+'</span> <button class="copy" data-copy="'+esc(j.value)+'">⧉</button> <button class="reveal" data-hide="1">hide</button>';
+      wireCards();
+    }catch(e){b.textContent="reveal";b.disabled=false;toast(e.message||"failed")}
+  });
+  document.querySelectorAll("[data-hide]").forEach(b=>b.onclick=()=>render());
+}
+function renderOther(v){
+  let html="";
+  const misc=STATE.misc||{};
+  Object.keys(misc).forEach(tab=>{
+    const grid=misc[tab].filter(r=>!Q||r.join(" ").toLowerCase().includes(Q));
+    if(!grid.length)return;
+    html+='<div class="miscblock"><h4>'+esc(tab)+'</h4><table class="misc">'+
+      grid.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table></div>";
+  });
+  (STATE.miscSecret||[]).forEach(m=>{
+    html+='<div class="locked"><span>🔒 <b>'+esc(m.tab)+'</b> — '+m.rows+' rows of credentials (admin only)</span><button class="btn sm" data-misc="'+esc(m.tab)+'">Reveal</button></div>';
+  });
+  v.innerHTML=html||'<div class="empty">No other sheets.</div>';
+  document.querySelectorAll("[data-misc]").forEach(b=>b.onclick=async()=>{
+    b.textContent="…";b.disabled=true;
+    try{
+      const j=await api("revealMisc",{tab:b.dataset.misc});
+      const block='<div class="miscblock"><h4>'+esc(b.dataset.misc)+' <span class="muted">(revealed)</span></h4><table class="misc">'+
+        j.rows.map(r=>"<tr>"+r.map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+"</table></div>";
+      b.closest(".locked").outerHTML=block;
+    }catch(e){b.textContent="Reveal";b.disabled=false;toast(e.message||"failed")}
+  });
+}
+
+/* ---------- connect modal ---------- */
+function showConnect(msg){
+  $("#mMsg").textContent=msg||"Paste the web-app URL and your personal access code. Both are stored on this device only.";
+  $("#mUrl").value=CFG.url||DEFAULT_API_URL||"";
+  $("#mCode").value=CFG.code||"";
+  $("#scrim").classList.add("on");
+}
+function closeConnect(){$("#scrim").classList.remove("on")}
+$("#mCancel").onclick=closeConnect;
+$("#gear").onclick=()=>showConnect();
+$("#mConnect").onclick=()=>{
+  CFG.url=$("#mUrl").value.trim();CFG.code=$("#mCode").value.trim();
+  if(!CFG.url||!CFG.code){toast("URL and code required");return}
+  saveCfg();connect(true);
+};
+
+/* ---------- theme + search + boot ---------- */
+function initTheme(){const s=localStorage.getItem(THEME_KEY);if(s)document.documentElement.setAttribute("data-theme",s);
+  $("#themeBtn").onclick=()=>{const cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+    const nx=cur==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",nx);localStorage.setItem(THEME_KEY,nx)}}
+let qt;$("#q").addEventListener("input",e=>{clearTimeout(qt);qt=setTimeout(()=>{Q=e.target.value.trim().toLowerCase();render()},120)});
+
+(function boot(){
+  initTheme();
+  const p=new URLSearchParams(location.search);
+  const k=p.get("k"),url=p.get("u");
+  if(k){CFG.code=k;if(url)CFG.url=url;else if(DEFAULT_API_URL)CFG.url=DEFAULT_API_URL;saveCfg();
+    history.replaceState({},"",location.pathname);}
+  if(CFG.url&&CFG.code){connect(false);}
+  else showConnect();
+})();
+</script>
