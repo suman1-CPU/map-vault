@@ -249,7 +249,8 @@ async function api(op,payload){
   u.searchParams.set("k",CFG.code);
   if(op)u.searchParams.set("op",op);
   if(payload)u.searchParams.set("payload",JSON.stringify(payload));
-  const r=await fetch(u.toString());
+  u.searchParams.set("_",Date.now());   // bust any cached GET so data is always fresh
+  const r=await fetch(u.toString(),{cache:"no-store"});
   const j=await r.json();
   if(!j.ok)throw new Error(j.error||"error");
   return j;
