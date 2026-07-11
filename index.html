@@ -549,7 +549,7 @@ function renderDetail(v){
   h+=factRow("Contact",r.contact,{plain:1})+factRow("UTR",r.utr)+factRow("VAT number",r.vatNo)+
      factRow("Email",r.email)+factRow("Phone",r.phone)+factRow("Address",r.address,{plain:1});
   // Directors & PSCs — live from Companies House (public register data)
-  const chp=(STATE.data.People||[]).filter(p=>c.no&&normNo(p.companyNo)===c.no);
+  const chp=c.no?(STATE.data.People||[]).filter(p=>normNo(p.companyNo)===normNo(c.no)):[];
   if(chp.length){
     h+='<h3>Directors &amp; PSCs · Companies House</h3>';
     chp.forEach(p=>{
