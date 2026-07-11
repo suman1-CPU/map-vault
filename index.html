@@ -307,14 +307,45 @@ function sourceTags(sources){
   return String(sources).split(",").filter(Boolean).map(s=>
     '<span class="pill '+(SRC_CLS[s]||"")+'">'+esc(SRC_LABEL[s]||s)+"</span>").join("");
 }
+/* VAT next-due computed live from the stagger (so it never goes stale between the
+   weekly sync and the monthly 7th deadlines). Mirrors roster.py vat_next_due(). */
+const VAT_MONTHS={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,
+  jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
+function vatNextDue(stagger){
+  if(!stagger)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const low=String(stagger).toLowerCase(),Y=today.getFullYear();
+  const dueFor=(y,m)=>{let dm=m+2,dy=y;while(dm>12){dm-=12;dy++;}return new Date(dy,dm-1,7);};
+  const monthEnd=(y,m)=>new Date(y,m,0);
+  let ends=[];
+  if(low.includes("monthly")){for(const y of[Y-1,Y,Y+1])for(let m=1;m<=12;m++)ends.push([y,m]);}
+  else{
+    const mm=low.match(/[a-z]+/g),endm=mm?VAT_MONTHS[mm[mm.length-1]]:null;
+    if(!endm)return null;
+    const cyc=[...new Set([0,1,2,3].map(i=>((endm-1+3*i)%12)+1))];
+    for(const y of[Y-1,Y,Y+1])for(const m of cyc)ends.push([y,m]);
+  }
+  let best=null;
+  for(const[y,m]of ends){const d=dueFor(y,m);if(d>=today&&(!best||d<best.due))best={due:d,pe:monthEnd(y,m)};}
+  if(!best)return null;
+  const f=d=>String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+  return {due:f(best.due),periodEnd:f(best.pe)};
+}
+function clientVat(c){
+  const r=c.c||{};
+  if(r.vatStagger){const v=vatNextDue(r.vatStagger);if(v)return {due:v.due,periodEnd:v.periodEnd,stagger:r.vatStagger};}
+  if(r.vatDue)return {due:r.vatDue,periodEnd:r.vatPeriodEnd||"",stagger:r.vatStagger||""};
+  return null;
+}
+
 function nextDue(c){
   const cand=[];
   if(c.dl&&c.dl.status==="active"){
     if(c.dl.accountsDue)cand.push({t:"Accounts",s:c.dl.accountsDue,o:c.dl.accountsOverdue==="yes",days:daysTo(c.dl.accountsDue)});
     if(c.dl.csDue)cand.push({t:"CS",s:c.dl.csDue,o:c.dl.csOverdue==="yes",days:daysTo(c.dl.csDue)});
   }
-  const r=c.c||{};
-  if(r.vatDue)cand.push({t:"VAT",s:r.vatDue,o:false,days:daysTo(r.vatDue)});
+  const vat=clientVat(c);
+  if(vat)cand.push({t:"VAT",s:vat.due,o:false,days:daysTo(vat.due)});
   if(!cand.length)return null;
   cand.sort((a,b)=>(a.days??9e9)-(b.days??9e9));
   return cand[0];
@@ -323,7 +354,8 @@ function nextDue(c){
 /* ---------- deadline items + filter pills (shared by Home & Deadlines) ---------- */
 const DLF=[["soon","Next 60 days"],["overdue","Overdue"],["acc","Accounts"],["cs","Conf. statements"],["vat","VAT"],["all","All"]];
 function pillbar(mode){ // mode: "dlf" filters in place, "dlnav" jumps to the calendar
-  return DLF.map(([id,l])=>'<button class="fbtn'+(DLFILTER===id?" on":"")+'" data-'+mode+'="'+id+'">'+esc(l)+"</button>").join("");
+  // only the in-place Deadlines pills reflect the active filter; Home pills are plain nav
+  return DLF.map(([id,l])=>'<button class="fbtn'+(mode==="dlf"&&DLFILTER===id?" on":"")+'" data-'+mode+'="'+id+'">'+esc(l)+"</button>").join("");
 }
 function deadlineItems(){
   const items=[];
@@ -333,9 +365,9 @@ function deadlineItems(){
       if(dl.accountsDue)items.push({c,t:"acc",label:"Accounts",due:dl.accountsDue,days:daysTo(dl.accountsDue),o:dl.accountsOverdue==="yes",sub:"made up to "+(dl.accountsMadeUpTo||"—")});
       if(dl.csDue)items.push({c,t:"cs",label:"Confirmation statement",due:dl.csDue,days:daysTo(dl.csDue),o:dl.csOverdue==="yes",sub:"statement date "+(dl.csMadeUpTo||"—")});
     }
-    const r=c.c||{};
-    if(r.vatDue)items.push({c,t:"vat",label:"VAT return",due:r.vatDue,days:daysTo(r.vatDue),o:false,
-      sub:(r.vatStagger?r.vatStagger+" · ":"")+"period end "+(r.vatPeriodEnd||"—")});
+    const vat=clientVat(c);
+    if(vat)items.push({c,t:"vat",label:"VAT return",due:vat.due,days:daysTo(vat.due),o:false,
+      sub:(vat.stagger?vat.stagger+" · ":"")+"period end "+(vat.periodEnd||"—")});
   });
   return items;
 }
@@ -390,7 +422,8 @@ function searchResults(){
 function renderHome(v){
   if(Q){v.innerHTML=searchResults();wire(v);return}
   const withDue=IDX.clients.map(c=>({c,nd:nextDue(c)})).filter(x=>x.nd&&x.nd.days!=null);
-  const overdue=withDue.filter(x=>x.nd.o||x.nd.days<0);
+  // CH-headed box = Companies House filings only (accounts/CS), never computed VAT
+  const overdue=withDue.filter(x=>(x.nd.o||x.nd.days<0)&&x.nd.t!=="VAT");
   const soon=withDue.filter(x=>!x.nd.o&&x.nd.days>=0&&x.nd.days<=31).sort((a,b)=>a.nd.days-b.nd.days);
   const recent=(loadJ(RECENT_KEY,[])).map(k=>IDX.byKey.get(k)).filter(Boolean);
   let h='<div class="filters" style="margin-top:12px">'+pillbar("dlnav")+"</div>";
@@ -398,7 +431,7 @@ function renderHome(v){
     h+='<div class="section"><h2>⚠️ Overdue at Companies House</h2><button class="more" data-nav="deadlines" data-f="overdue">See all</button></div>'+
        '<div class="card rowlist">'+overdue.slice(0,4).map(x=>clientRow(x.c)).join("")+"</div>";
   }
-  h+='<div class="section"><h2>Coming up</h2><button class="more" data-nav="deadlines">All deadlines</button></div>';
+  h+='<div class="section"><h2>Coming up</h2><button class="more" data-nav="deadlines" data-f="soon">Open calendar</button></div>';
   h+=soon.length?'<div class="card rowlist">'+soon.slice(0,6).map(x=>clientRow(x.c)).join("")+"</div>"
     :'<div class="card"><div class="empty" style="padding:26px">Nothing due in the next month 🎉</div></div>';
   if(recent.length){h+='<div class="section"><h2>Recently viewed</h2></div><div class="card rowlist">'+recent.map(clientRow).join("")+"</div>"}
@@ -449,16 +482,18 @@ function renderDeadlines(v){
   const now=new Date();
   if(CAL.y==null){CAL.y=now.getFullYear();CAL.m=now.getMonth()}
   const f=dlFiltered(deadlineItems()).sort((a,b)=>(a.days??9e9)-(b.days??9e9));
-  let h='<div class="filters" style="margin-top:10px">'+pillbar("dlf")+"</div>";
   const showCal=DLFILTER!=="overdue";
+  // validate the selected day BEFORE painting so no orphan highlight survives a filter change
+  let day=[];
+  if(showCal&&CAL.sel){day=f.filter(i=>i.due===CAL.sel);if(!day.length)CAL.sel=null;}
+  else if(!showCal)CAL.sel=null;
+  let h='<div class="filters" style="margin-top:10px">'+pillbar("dlf")+"</div>";
   if(showCal)h+=calendarHTML(f);
-  let list=f, selNote="";
-  if(showCal&&CAL.sel){
-    const day=f.filter(i=>i.due===CAL.sel);
-    if(day.length){list=day;selNote='<div class="selday">'+esc(CAL.sel)+" · "+day.length+" filing"+(day.length>1?"s":"")+' <button data-calclear="1">✕</button></div>'}
-    else CAL.sel=null;
+  let list=f;
+  if(showCal&&CAL.sel&&day.length){
+    list=day;
+    h+='<div class="selday">'+esc(CAL.sel)+" · "+day.length+" filing"+(day.length>1?"s":"")+' <button data-calclear="1">✕</button></div>';
   }
-  h+=selNote;
   h+=list.length?'<div class="card rowlist">'+list.slice(0,200).map(i=>{
     const cls=dueClass(i.days,i.o),note=dueNote(i.days,i.o);
     return '<div class="row" data-open="'+esc(i.c.k)+'"><div class="avatar">'+esc(initials(i.c.name))+'</div>'+
@@ -498,14 +533,15 @@ function renderDetail(v){
   const duecards=[];
   if(dl&&dl.accountsDue)duecards.push(["📊 Accounts due",dl.accountsDue,dl.accountsOverdue==="yes","made up to "+(dl.accountsMadeUpTo||"—")]);
   if(dl&&dl.csDue)duecards.push(["📄 Conf. statement",dl.csDue,dl.csOverdue==="yes","statement date "+(dl.csMadeUpTo||"—")]);
-  if(r.vatDue)duecards.push(["🧾 VAT return",r.vatDue,false,(r.vatStagger||"")+" · period end "+(r.vatPeriodEnd||"—")]);
+  const cv=clientVat(c);
+  if(cv)duecards.push(["🧾 VAT return",cv.due,false,(cv.stagger||"")+" · period end "+(cv.periodEnd||"—")]);
   if(duecards.length){
     h+='<div class="dueband"'+(duecards.length>2?' style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"':"")+'>';
     duecards.forEach(([lab,due,o,sub])=>{
       const days=daysTo(due),cls=dueClass(days,o),note=dueNote(days,o);
       h+='<div class="duecard '+cls+'"><div class="dl">'+lab+'</div><div class="dv">'+esc(due)+'</div><div class="dn">'+esc(sub)+(note?" · <b>"+esc(note)+"</b>":"")+"</div></div>";
     });
-    h+='</div><div class="srcnote">Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(r.vatDue?" · VAT from the stagger sheet":"")+"</div>";
+    h+='</div><div class="srcnote">Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(cv?" · VAT computed from the stagger":"")+"</div>";
   }
   h+='<div class="dsec">';
   h+='<h3>Company details</h3>';
@@ -597,8 +633,8 @@ function wire(v){
   v.querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>openClient(el.dataset.open));
   v.querySelectorAll("[data-person]").forEach(el=>el.onclick=()=>{DETAIL={person:el.dataset.person};window.scrollTo(0,0);paint()});
   v.querySelectorAll("[data-nav]").forEach(el=>el.onclick=()=>{VIEWN=el.dataset.nav;DETAIL=null;if(el.dataset.f)DLFILTER=el.dataset.f;paint()});
-  v.querySelectorAll("[data-dlf]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlf;paint()});
-  v.querySelectorAll("[data-dlnav]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlnav;VIEWN="deadlines";DETAIL=null;window.scrollTo(0,0);paint()});
+  v.querySelectorAll("[data-dlf]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlf;CAL.sel=null;paint()});
+  v.querySelectorAll("[data-dlnav]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlnav;CAL.sel=null;VIEWN="deadlines";DETAIL=null;window.scrollTo(0,0);paint()});
   v.querySelectorAll("[data-cal]").forEach(el=>el.onclick=()=>{
     const d=+el.dataset.cal;CAL.sel=null;
     if(d===0){const n=new Date();CAL.y=n.getFullYear();CAL.m=n.getMonth()}
@@ -635,7 +671,7 @@ function wire(v){
   const rl=v.querySelector("#reloadBtn");if(rl)rl.onclick=()=>connect(true);
   const rc=v.querySelector("#reconnBtn");if(rc)rc.onclick=()=>showConnect();
 }
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{VIEWN=b.dataset.v;DETAIL=null;Q="";$("#q").value="";$("#qclear").style.display="none";window.scrollTo(0,0);paint()});
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{VIEWN=b.dataset.v;DETAIL=null;CAL.sel=null;Q="";$("#q").value="";$("#qclear").style.display="none";window.scrollTo(0,0);paint()});
 
 /* ---------- search ---------- */
 let qt;
