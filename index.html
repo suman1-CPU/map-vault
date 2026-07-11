@@ -120,6 +120,29 @@ nav button.on .ni{transform:scale(1.06)}
 .fbtn{border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:20px;padding:7px 14px;font-size:13.5px;font-weight:650;white-space:nowrap}
 .fbtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
+/* ---------- calendar ---------- */
+.cal{padding:12px 12px 10px;margin-bottom:12px}
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.calhead b{font-size:15.5px}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.caldow div{text-align:center;font-size:11px;color:var(--mut);font-weight:700;padding:2px 0}
+.cd{height:48px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;position:relative;border:1px solid transparent}
+.cd.off{visibility:hidden}
+.cd.has{background:var(--chip);cursor:pointer;font-weight:650}
+.cd.has:active{filter:brightness(.95)}
+.cd.today{border-color:var(--accent)}
+.cd.sel{background:var(--accent);color:var(--accent-ink)}
+.dots{display:flex;gap:2.5px;height:5px}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.dot.acc{background:var(--accent)} .dot.cs{background:var(--amber)} .dot.vat{background:var(--green)} .dot.od{background:var(--red)}
+.cd.sel .dot{background:var(--accent-ink)}
+.more2{position:absolute;top:2px;right:4px;font-size:9px;color:var(--mut)}
+.cd.sel .more2{color:var(--accent-ink)}
+.callegend{display:flex;gap:14px;justify-content:center;margin-top:9px;font-size:11.5px;color:var(--mut);flex-wrap:wrap}
+.callegend .dot{margin-right:4px}
+.selday{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13.5px;color:var(--mut);font-weight:650}
+.selday button{border:none;background:var(--chip);border-radius:50%;width:22px;height:22px;font-size:11px;color:var(--mut)}
+
 /* ---------- misc tables ---------- */
 .acc{border-bottom:1px solid var(--line)}
 .acc:last-child{border-bottom:none}
@@ -285,12 +308,44 @@ function sourceTags(sources){
     '<span class="pill '+(SRC_CLS[s]||"")+'">'+esc(SRC_LABEL[s]||s)+"</span>").join("");
 }
 function nextDue(c){
-  if(!c.dl)return null;
-  const cand=[["Accounts",c.dl.accountsDue,c.dl.accountsOverdue],["CS",c.dl.csDue,c.dl.csOverdue]]
-    .map(([t,s,o])=>({t,s,o:o==="yes",days:daysTo(s)})).filter(x=>x.s);
+  const cand=[];
+  if(c.dl&&c.dl.status==="active"){
+    if(c.dl.accountsDue)cand.push({t:"Accounts",s:c.dl.accountsDue,o:c.dl.accountsOverdue==="yes",days:daysTo(c.dl.accountsDue)});
+    if(c.dl.csDue)cand.push({t:"CS",s:c.dl.csDue,o:c.dl.csOverdue==="yes",days:daysTo(c.dl.csDue)});
+  }
+  const r=c.c||{};
+  if(r.vatDue)cand.push({t:"VAT",s:r.vatDue,o:false,days:daysTo(r.vatDue)});
   if(!cand.length)return null;
   cand.sort((a,b)=>(a.days??9e9)-(b.days??9e9));
   return cand[0];
+}
+
+/* ---------- deadline items + filter pills (shared by Home & Deadlines) ---------- */
+const DLF=[["soon","Next 60 days"],["overdue","Overdue"],["acc","Accounts"],["cs","Conf. statements"],["vat","VAT"],["all","All"]];
+function pillbar(mode){ // mode: "dlf" filters in place, "dlnav" jumps to the calendar
+  return DLF.map(([id,l])=>'<button class="fbtn'+(DLFILTER===id?" on":"")+'" data-'+mode+'="'+id+'">'+esc(l)+"</button>").join("");
+}
+function deadlineItems(){
+  const items=[];
+  IDX.clients.forEach(c=>{
+    const dl=c.dl;
+    if(dl&&dl.status==="active"){
+      if(dl.accountsDue)items.push({c,t:"acc",label:"Accounts",due:dl.accountsDue,days:daysTo(dl.accountsDue),o:dl.accountsOverdue==="yes",sub:"made up to "+(dl.accountsMadeUpTo||"—")});
+      if(dl.csDue)items.push({c,t:"cs",label:"Confirmation statement",due:dl.csDue,days:daysTo(dl.csDue),o:dl.csOverdue==="yes",sub:"statement date "+(dl.csMadeUpTo||"—")});
+    }
+    const r=c.c||{};
+    if(r.vatDue)items.push({c,t:"vat",label:"VAT return",due:r.vatDue,days:daysTo(r.vatDue),o:false,
+      sub:(r.vatStagger?r.vatStagger+" · ":"")+"period end "+(r.vatPeriodEnd||"—")});
+  });
+  return items;
+}
+function dlFiltered(items){
+  if(DLFILTER==="overdue")return items.filter(i=>i.o||(i.days!=null&&i.days<0));
+  if(DLFILTER==="acc")return items.filter(i=>i.t==="acc");
+  if(DLFILTER==="cs")return items.filter(i=>i.t==="cs");
+  if(DLFILTER==="vat")return items.filter(i=>i.t==="vat");
+  if(DLFILTER==="soon")return items.filter(i=>i.o||(i.days!=null&&i.days>=-31&&i.days<=60));
+  return items;
 }
 
 /* ---------- painting ---------- */
@@ -338,10 +393,7 @@ function renderHome(v){
   const overdue=withDue.filter(x=>x.nd.o||x.nd.days<0);
   const soon=withDue.filter(x=>!x.nd.o&&x.nd.days>=0&&x.nd.days<=31).sort((a,b)=>a.nd.days-b.nd.days);
   const recent=(loadJ(RECENT_KEY,[])).map(k=>IDX.byKey.get(k)).filter(Boolean);
-  let h='<div class="tiles">'+
-    '<div class="tile" data-nav="clients"><b>'+IDX.clients.length+'</b><span>clients</span></div>'+
-    '<div class="tile'+(overdue.length?" warn":"")+'" data-nav="deadlines" data-f="overdue"><b>'+overdue.length+'</b><span>overdue</span></div>'+
-    '<div class="tile" data-nav="deadlines"><b>'+soon.length+'</b><span>due ≤ 31 days</span></div></div>';
+  let h='<div class="filters" style="margin-top:12px">'+pillbar("dlnav")+"</div>";
   if(overdue.length){
     h+='<div class="section"><h2>⚠️ Overdue at Companies House</h2><button class="more" data-nav="deadlines" data-f="overdue">See all</button></div>'+
        '<div class="card rowlist">'+overdue.slice(0,4).map(x=>clientRow(x.c)).join("")+"</div>";
@@ -367,28 +419,54 @@ function renderClients(v){
   v.innerHTML=h.replace('<div class="card rowlist"></div>',"");wire(v);
 }
 
+let CAL={y:null,m:null,sel:null};
+function calendarHTML(items){
+  const byDay={};
+  items.forEach(i=>{if(parseDMY(i.due))(byDay[i.due]=byDay[i.due]||[]).push(i)});
+  const y=CAL.y,m=CAL.m,first=new Date(y,m,1);
+  const startDow=(first.getDay()+6)%7, dim=new Date(y,m+1,0).getDate();
+  const now=new Date(), curMonth=now.getFullYear()===y&&now.getMonth()===m;
+  const monthName=first.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  let cells="";
+  for(let i=0;i<startDow;i++)cells+='<div class="cd off"></div>';
+  for(let d=1;d<=dim;d++){
+    const key=String(d).padStart(2,"0")+"/"+String(m+1).padStart(2,"0")+"/"+y;
+    const its=byDay[key]||[];
+    const dots=its.slice(0,4).map(i=>'<span class="dot '+(i.o?"od":i.t)+'"></span>').join("");
+    cells+='<div class="cd'+(curMonth&&now.getDate()===d?" today":"")+(its.length?" has":"")+(CAL.sel===key?" sel":"")+'"'+
+      (its.length?' data-day="'+key+'"':"")+'><span>'+d+'</span><div class="dots">'+dots+"</div>"+
+      (its.length>4?'<span class="more2">+'+(its.length-4)+"</span>":"")+"</div>";
+  }
+  return '<div class="card cal"><div class="calhead"><button class="iconbtn" data-cal="-1">‹</button><b>'+esc(monthName)+"</b>"+
+    '<span style="display:flex;gap:6px">'+(curMonth?"":'<button class="btn sm" data-cal="0">Today</button>')+
+    '<button class="iconbtn" data-cal="1">›</button></span></div>'+
+    '<div class="calgrid caldow">'+["M","T","W","T","F","S","S"].map(x=>"<div>"+x+"</div>").join("")+"</div>"+
+    '<div class="calgrid">'+cells+"</div>"+
+    '<div class="callegend"><span><span class="dot acc"></span>Accounts</span><span><span class="dot cs"></span>Conf. stmt</span>'+
+    '<span><span class="dot vat"></span>VAT</span><span><span class="dot od"></span>Overdue</span></div></div>';
+}
 function renderDeadlines(v){
-  const rows=IDX.clients.map(c=>({c,dl:c.dl})).filter(x=>x.dl&&x.dl.status==="active");
-  const items=[];
-  rows.forEach(({c,dl})=>{
-    if(dl.accountsDue)items.push({c,type:"Accounts",due:dl.accountsDue,days:daysTo(dl.accountsDue),o:dl.accountsOverdue==="yes",sub:"made up to "+(dl.accountsMadeUpTo||"—")});
-    if(dl.csDue)items.push({c,type:"Confirmation statement",due:dl.csDue,days:daysTo(dl.csDue),o:dl.csOverdue==="yes",sub:"statement date "+(dl.csMadeUpTo||"—")});
-  });
-  let f=items;
-  if(DLFILTER==="overdue")f=items.filter(i=>i.o||i.days<0);
-  else if(DLFILTER==="soon")f=items.filter(i=>i.days!=null&&i.days<=60&&i.days>=0||i.o||i.days<0);
-  else if(DLFILTER==="acc")f=items.filter(i=>i.type==="Accounts");
-  else if(DLFILTER==="cs")f=items.filter(i=>i.type!=="Accounts");
-  f.sort((a,b)=>(a.days??9e9)-(b.days??9e9));
-  const fb=(id,label)=>'<button class="fbtn'+(DLFILTER===id?" on":"")+'" data-dlf="'+id+'">'+label+"</button>";
-  let h='<div class="filters" style="margin-top:10px">'+fb("soon","Next 60 days")+fb("overdue","Overdue")+fb("acc","Accounts")+fb("cs","Conf. statements")+fb("all","All")+"</div>";
-  h+=f.length?'<div class="card rowlist">'+f.slice(0,200).map(i=>{
+  const now=new Date();
+  if(CAL.y==null){CAL.y=now.getFullYear();CAL.m=now.getMonth()}
+  const f=dlFiltered(deadlineItems()).sort((a,b)=>(a.days??9e9)-(b.days??9e9));
+  let h='<div class="filters" style="margin-top:10px">'+pillbar("dlf")+"</div>";
+  const showCal=DLFILTER!=="overdue";
+  if(showCal)h+=calendarHTML(f);
+  let list=f, selNote="";
+  if(showCal&&CAL.sel){
+    const day=f.filter(i=>i.due===CAL.sel);
+    if(day.length){list=day;selNote='<div class="selday">'+esc(CAL.sel)+" · "+day.length+" filing"+(day.length>1?"s":"")+' <button data-calclear="1">✕</button></div>'}
+    else CAL.sel=null;
+  }
+  h+=selNote;
+  h+=list.length?'<div class="card rowlist">'+list.slice(0,200).map(i=>{
     const cls=dueClass(i.days,i.o),note=dueNote(i.days,i.o);
     return '<div class="row" data-open="'+esc(i.c.k)+'"><div class="avatar">'+esc(initials(i.c.name))+'</div>'+
-      '<div class="rmain"><div class="rname">'+esc(i.c.name)+'</div><div class="rsub">'+esc(i.type)+' · '+esc(i.sub)+'</div></div>'+
+      '<div class="rmain"><div class="rname">'+esc(i.c.name)+'</div><div class="rsub">'+esc(i.label)+' · '+esc(i.sub)+'</div></div>'+
       '<span class="pill '+cls+'">'+esc(i.due)+(note?" · "+esc(note):"")+"</span><span class=\"chev\">›</span></div>";
   }).join("")+"</div>":'<div class="empty"><span class="big">🎉</span>Nothing here</div>';
-  h+='<div class="srcnote" style="padding:12px 4px 0">Live from Companies House'+(chRefreshed()?" · refreshed "+esc(chRefreshed()):"")+"</div>";
+  if(list.length>200)h+='<div class="srcnote" style="padding:8px 4px 0">Showing the first 200 of '+list.length+" — narrow the filter.</div>";
+  h+='<div class="srcnote" style="padding:12px 4px 0">Accounts & CS live from Companies House'+(chRefreshed()?" · refreshed "+esc(chRefreshed()):"")+" · VAT dates computed from the VAT master sheet staggers</div>";
   v.innerHTML=h;wire(v);
 }
 function chRefreshed(){const r=(STATE.data.Deadlines||[]).find(x=>x.chRefreshed);return r?r.chRefreshed:""}
@@ -417,15 +495,17 @@ function renderDetail(v){
      (dl&&dl.status?'<span class="pill '+(dl.status==="active"?"green":"red")+'">'+esc(dl.status)+"</span>":"")+
      sourceTags(r.sources)+
      (r.incDate?'<span>since '+esc(r.incDate)+"</span>":"")+"</div></div>";
-  if(dl&&(dl.accountsDue||dl.csDue)){
-    h+='<div class="dueband">';
-    [["📊 Accounts due",dl.accountsDue,dl.accountsOverdue==="yes","made up to "+(dl.accountsMadeUpTo||"—")],
-     ["📄 Conf. statement",dl.csDue,dl.csOverdue==="yes","statement date "+(dl.csMadeUpTo||"—")]].forEach(([lab,due,o,sub])=>{
-      if(!due)return;
+  const duecards=[];
+  if(dl&&dl.accountsDue)duecards.push(["📊 Accounts due",dl.accountsDue,dl.accountsOverdue==="yes","made up to "+(dl.accountsMadeUpTo||"—")]);
+  if(dl&&dl.csDue)duecards.push(["📄 Conf. statement",dl.csDue,dl.csOverdue==="yes","statement date "+(dl.csMadeUpTo||"—")]);
+  if(r.vatDue)duecards.push(["🧾 VAT return",r.vatDue,false,(r.vatStagger||"")+" · period end "+(r.vatPeriodEnd||"—")]);
+  if(duecards.length){
+    h+='<div class="dueband"'+(duecards.length>2?' style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"':"")+'>';
+    duecards.forEach(([lab,due,o,sub])=>{
       const days=daysTo(due),cls=dueClass(days,o),note=dueNote(days,o);
       h+='<div class="duecard '+cls+'"><div class="dl">'+lab+'</div><div class="dv">'+esc(due)+'</div><div class="dn">'+esc(sub)+(note?" · <b>"+esc(note)+"</b>":"")+"</div></div>";
     });
-    h+='</div><div class="srcnote">Live from Companies House · refreshed '+esc(dl.chRefreshed||"")+"</div>";
+    h+='</div><div class="srcnote">Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(r.vatDue?" · VAT from the stagger sheet":"")+"</div>";
   }
   h+='<div class="dsec">';
   h+='<h3>Company details</h3>';
@@ -518,6 +598,15 @@ function wire(v){
   v.querySelectorAll("[data-person]").forEach(el=>el.onclick=()=>{DETAIL={person:el.dataset.person};window.scrollTo(0,0);paint()});
   v.querySelectorAll("[data-nav]").forEach(el=>el.onclick=()=>{VIEWN=el.dataset.nav;DETAIL=null;if(el.dataset.f)DLFILTER=el.dataset.f;paint()});
   v.querySelectorAll("[data-dlf]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlf;paint()});
+  v.querySelectorAll("[data-dlnav]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlnav;VIEWN="deadlines";DETAIL=null;window.scrollTo(0,0);paint()});
+  v.querySelectorAll("[data-cal]").forEach(el=>el.onclick=()=>{
+    const d=+el.dataset.cal;CAL.sel=null;
+    if(d===0){const n=new Date();CAL.y=n.getFullYear();CAL.m=n.getMonth()}
+    else{CAL.m+=d;if(CAL.m<0){CAL.m=11;CAL.y--}if(CAL.m>11){CAL.m=0;CAL.y++}}
+    paint();
+  });
+  v.querySelectorAll("[data-day]").forEach(el=>el.onclick=()=>{CAL.sel=CAL.sel===el.dataset.day?null:el.dataset.day;paint()});
+  v.querySelectorAll("[data-calclear]").forEach(el=>el.onclick=()=>{CAL.sel=null;paint()});
   v.querySelectorAll("[data-copy]").forEach(b=>b.onclick=e=>{e.stopPropagation();copyTxt(b.dataset.copy)});
   const back=v.querySelector("#back");if(back)back.onclick=()=>{DETAIL=null;paint()};
   v.querySelectorAll("[data-acc]").forEach(a=>{a.querySelector("button").onclick=()=>a.classList.toggle("open")});
