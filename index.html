@@ -245,6 +245,50 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 .conn.sync{background:var(--amber);animation:cpulse 1.1s ease-in-out infinite}
 @keyframes cpulse{0%,100%{opacity:1}50%{opacity:.3}}
 .gletter{position:sticky;top:calc(126px + env(safe-area-inset-top));font-size:11.5px;font-weight:700;color:var(--mut);padding:10px 4px 4px;background:var(--bg);z-index:5;letter-spacing:.6px}
+
+/* ---------- v2 write layer: FAB, forms, wizard, edit, changes ---------- */
+.fab{position:fixed;right:16px;bottom:calc(var(--navh) + 14px + env(safe-area-inset-bottom));z-index:45;
+  background:var(--accent);color:var(--accent-ink);border:none;border-radius:99px;height:50px;padding:0 20px 0 16px;
+  display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:650;box-shadow:0 4px 16px rgba(58,86,212,.4)}
+.fab .ic{width:20px;height:20px;stroke-width:2.2}
+@media(hover:hover){.fab:hover{filter:brightness(1.07)}}
+.linkbtn{background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;padding:6px 0;display:inline-flex;align-items:center;gap:6px}
+.linkbtn.mut{color:var(--mut)}
+.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);outline:none;font-size:16px;font-family:inherit}
+.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.field textarea{min-height:64px;resize:vertical}
+.field .hint{font-size:11.5px;color:var(--mut);margin-top:4px;font-weight:400}
+.field.lock input,.field.lock textarea{opacity:.55;pointer-events:none;background:var(--chip)}
+.frow{display:flex;gap:10px}.frow>.field{flex:1;min-width:0}
+.steps{display:flex;gap:6px;margin-bottom:14px}
+.steps .st{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.steps .st.on{background:var(--accent)}
+.pickrow{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--bg)}
+.pickrow:active{background:var(--chip)}
+@media(hover:hover){.pickrow:hover{border-color:var(--accent)}}
+.pickrow .pmain{flex:1;min-width:0}
+.pickrow .pn{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pickrow .ps{font-size:12px;color:var(--mut);font-family:var(--mono)}
+.namechips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.namechips button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:9px 16px;font-size:14px;font-weight:600}
+.namechips button:active{background:var(--chip)}
+@media(hover:hover){.namechips button:hover{border-color:var(--accent);color:var(--accent)}}
+.editpen{margin-left:auto;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--mut);display:inline-flex;align-items:center;gap:5px}
+.editpen .ic{width:13px;height:13px}
+@media(hover:hover){.editpen:hover{color:var(--accent);border-color:var(--accent)}}
+.h3row{display:flex;align-items:center;margin:18px 0 6px}
+.h3row h3{margin:0}
+.acctgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 0 4px}
+.acctcell{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:transparent}
+.acctcell .al{font-size:10.5px;color:var(--mut);font-weight:650;text-transform:uppercase;letter-spacing:.5px}
+.acctcell .av{font-size:14px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;word-break:break-word}
+.chgrow{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px}
+.chgrow:last-child{border-bottom:none}
+.chgrow .ct{font-family:var(--mono);font-size:11px;color:var(--mut);flex:0 0 auto;width:74px}
+.chgrow .cop{font-weight:650}
+.chgrow .cop.add{color:var(--green)}.chgrow .cop.remove{color:var(--red)}.chgrow .cop.update{color:var(--accent)}.chgrow .cop.restore{color:var(--gold)}
+.tag{font-size:11px;font-weight:650;padding:2px 7px;border-radius:6px;background:var(--chip);color:var(--mut)}
+.tag.vault{background:var(--accent-soft);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -272,6 +316,11 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 <symbol id="i-search-x" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.3"/><path d="m20 20-4.2-4.2"/><path d="M9 9l4 4"/><path d="M13 9l-4 4"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.2"/><path d="M12 19v2.2"/><path d="M2.8 12h2.2"/><path d="M19 12h2.2"/><path d="m5.2 5.2 1.6 1.6"/><path d="m17.2 17.2 1.6 1.6"/><path d="m18.8 5.2-1.6 1.6"/><path d="m6.8 17.2-1.6 1.6"/></symbol>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.2 13.1A8.2 8.2 0 1 1 10.9 3.8a6.6 6.6 0 0 0 9.3 9.3Z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M16.4 4.6a2 2 0 0 1 2.8 2.8L8.2 18.4 4 19.5l1.1-4.2L16.4 4.6Z"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/><path d="M6.5 7l.8 12.2A1.6 1.6 0 0 0 8.9 20.8h6.2a1.6 1.6 0 0 0 1.6-1.6L17.5 7"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 1 2.6 6.1"/><path d="M3.2 18.5v-4h4"/><path d="M12 8v4.2l3 1.8"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><path d="M5 20V5.5A1.5 1.5 0 0 1 6.5 4h7A1.5 1.5 0 0 1 15 5.5V20"/><path d="M15 9h2.5A1.5 1.5 0 0 1 19 10.5V20"/><path d="M3.5 20h17"/><path d="M8 8h4M8 11.5h4M8 15h4"/></symbol>
 </defs></svg>
 
 <header>
@@ -298,25 +347,39 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 
 <div class="scrim" id="scrim">
   <div class="modal">
-    <h2>Connect to the vault</h2>
-    <p id="mMsg">Paste your personal access code (from your invite link). It stays on this device only.</p>
-    <div class="field"><label>Your access code</label><input id="mCode" placeholder="access code" autocomplete="off"></div>
-    <details style="margin-bottom:14px"><summary>Advanced: web app URL</summary>
+    <h2 id="mTitle">Open the vault</h2>
+    <p id="mMsg">Enter the team password and your name. It stays on this device only.</p>
+    <div id="mTeam">
+      <div class="field"><label>Team password</label><input id="mPass" type="password" placeholder="password" autocomplete="off"></div>
+      <div class="field"><label>Your name</label><input id="mName" placeholder="e.g. Priyanka" autocomplete="off" list="teamlist"><datalist id="teamlist"></datalist></div>
+      <div class="namechips" id="mChips"></div>
+    </div>
+    <div id="mAdmin" style="display:none">
+      <div class="field"><label>Admin access code</label><input id="mCode" placeholder="access code" autocomplete="off"></div>
+    </div>
+    <button class="linkbtn" id="mToggle">Use an admin code instead</button>
+    <details style="margin:8px 0 14px"><summary>Advanced: web app URL</summary>
       <div class="field" style="margin-top:8px"><label>Web app URL</label><input id="mUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
     </details>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn" id="mDemo" style="margin-right:auto">Preview sample data</button>
       <button class="btn" id="mCancel">Cancel</button>
-      <button class="btn primary" id="mConnect">Connect</button>
+      <button class="btn primary" id="mConnect">Open</button>
     </div>
   </div>
 </div>
+
+<div class="scrim" id="scrim2"><div class="modal" id="modal2"></div></div>
+
+<button class="fab" id="fab" style="display:none"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>New client</button>
 
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
 const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyopmm6e_aymCbnz3phNKU9Ag-9vaXf0nQVjnn3ukOukLqSJj6oPNy5veC2KuPKuuew/exec";
+const YE_SHEET_ID = "1WkEkfxoyn6ckxvAsAVp1_z1Egi1WmQ5SD9fK8cI_bT0";   // year-end master sheet (for the "edit on the master sheet" link)
+const WRITE_OPS = {add:1,update:1,remove:1,restore:1};                 // sent by POST + text/plain (CORS simple request, carries secrets off-URL)
 const CFG_KEY="mapvault.cfg", THEME_KEY="mapvault.theme", RECENT_KEY="mapvault.recent", CACHE_KEY="mapvault.cache";
 let CFG=loadJ(CFG_KEY,{}), STATE=null, IDX=null, VIEWN="home", DETAIL=null, Q="", DLFILTER="soon", LASTSTR=null;
 
@@ -346,16 +409,30 @@ function safeUrl(x){try{const u=new URL(x);return u.hostname==="script.google.co
 async function api(op,payload){
   if(DEMO)return demoApi(op,payload);
   const target=safeUrl(CFG.url)||DEFAULT_API_URL;
-  const u=new URL(target);
-  u.searchParams.set("k",CFG.code);
-  if(op)u.searchParams.set("op",op);
-  if(payload)u.searchParams.set("payload",JSON.stringify(payload));
-  u.searchParams.set("_",Date.now());   // bust any cached GET so data is always fresh
-  let r;
-  try{ r=await fetch(u.toString(),{cache:"no-store"}); }
-  catch(e){ const err=new Error("network"); err.network=true; throw err; }   // offline / DNS / CORS
-  const j=await r.json();
-  if(!j.ok){ const err=new Error(j.error||"error"); if(/unauth|forbidden|denied/i.test(j.error||"")) err.auth=true; throw err; }
+  let j;
+  if(WRITE_OPS[op]){
+    // writes ride on POST + text/plain: a CORS "simple request" (no preflight,
+    // which Apps Script can't answer) that keeps secret values OUT of the URL.
+    let r;
+    try{ r=await fetch(target,{method:"POST",cache:"no-store",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({k:CFG.code,who:CFG.who||"",op:op,payload:payload})}); }
+    catch(e){ const err=new Error("network");err.network=true;throw err; }
+    j=await r.json();
+  }else{
+    const u=new URL(target);
+    u.searchParams.set("k",CFG.code);
+    if(CFG.who)u.searchParams.set("who",CFG.who);   // team tier: identify who is asking
+    if(op)u.searchParams.set("op",op);
+    if(payload)u.searchParams.set("payload",JSON.stringify(payload));
+    u.searchParams.set("_",Date.now());   // bust any cached GET so data is always fresh
+    let r;
+    try{ r=await fetch(u.toString(),{cache:"no-store"}); }
+    catch(e){ const err=new Error("network"); err.network=true; throw err; }   // offline / DNS / CORS
+    j=await r.json();
+  }
+  if(!j.ok){ const err=new Error(j.error||"error"); err.data=j;
+    if(/unauth|forbidden|denied/i.test(j.error||"")) err.auth=true; throw err; }
   return j;
 }
 /* Load flow: if this device has cached data we paint it INSTANTLY and refresh in the
@@ -404,6 +481,16 @@ async function connect(announce){
     if(announce)toast("Hi "+STATE.me+" — connected"+(STATE.role==="admin"?" as admin":""));
   }catch(e){
     stopLoading();
+    // team tier: correct password but we still need (or didn't recognise) the name
+    if(e.data&&(e.data.error==="name_required"||e.data.error==="name_unknown")){
+      if(!STATE&&!wasDemo)$("#view").innerHTML=NOTCONN;
+      setConn();
+      showConnect(e.data.error==="name_required"?"One more step — which of you is this?"
+        :"That name isn't on the team list. Pick yours:", e.data.teamNames||[]);
+      return;
+    }
+    if(e.data&&e.data.error==="locked"){ setConn("err");
+      showConnect("Too many attempts. Wait a few minutes, then try again."); return; }
     if(wasDemo){ DEMO=true;setConn();paint();      // couldn't leave sample mode -> stay safely sandboxed
       if($("#scrim").classList.contains("on"))$("#mMsg").textContent="Couldn't connect. Check the code and try again.";
       else toast("Couldn't connect — still in sample mode");
@@ -429,10 +516,26 @@ function demoState(){
   misc:{"HMRC contact numbers":[["Agent dedicated line","0300 200 3311"],["VAT general enquiries","0300 200 3700"],["PAYE for employers","0300 200 3200"]],
         "Companies House fees":[["CS01 confirmation statement","£34"],["Change of name","£20"],["DS01 strike-off","£33"]]},
   miscSecret:[{tab:"Bank details",rows:14},{tab:"Quickfile log in",rows:6}],
+  teamNames:["Priyanka","Ronak","Bhavya"],
+  write:{admin:{"*":"all"},staff:{Companies:{add:true,editFields:["contact","email","phone","address","notes","services","status"]},PersonalCodes:{add:true,editFields:["invoiced","email","notes","status"]},Logins:{add:true,editFields:["notes","email","phone","status"]},Pensions:{add:true,editFields:["notes","status"]}}},
+  master:[
+    {company:"Alderline Consulting Ltd",accountFrom:"01/11/2024",accountTo:"31/10/2025",accountsDue:dPlus(9),csDeadline:dPlus(48),owner:"Priyanka",acctStatus:"Active",idvDue:"—",payroll:"No",software:"TaxCalc",followUp:"Awaiting October bank statements"},
+    {company:"Bright & Mason Joinery Ltd",accountFrom:"01/10/2024",accountTo:"30/09/2025",accountsDue:dPlus(26),csDeadline:dPlus(64),owner:"Ronak",acctStatus:"Active",idvDue:dPlus(80),payroll:"Yes",software:"VT",codesHeld:"MASON, Daniel: CTL-XXXX-XXXX"},
+    {company:"Dartmoor Kitchens Ltd",accountFrom:"01/12/2024",accountTo:"30/11/2025",accountsDue:dPlus(55),csDeadline:dPlus(12),owner:"Priyanka",acctStatus:"Active",payroll:"No"}
+  ],
+  changes:[
+    {when:dPlus(0)+"T09:14",who:"Bhavya (team)",op:"add",tab:"PersonalCodes",id:"p_x1",entity:"Priya Chandra",field:"",oldValue:"",newValue:"(created)"},
+    {when:dPlus(0)+"T09:02",who:"Priyanka (team)",op:"update",tab:"Companies",id:"c_demo1",entity:"Alderline Consulting Ltd",field:"email",oldValue:"old@alderline.example",newValue:"sarah@alderline.example"},
+    {when:dPlus(-1)+"T16:40",who:"Suman",op:"add",tab:"Companies",id:"c_demo9",entity:"Sample Findings Ltd",field:"",oldValue:"",newValue:"(created)"},
+    {when:dPlus(-1)+"T11:20",who:"Ankur",op:"remove",tab:"Logins",id:"l_x",entity:"Old Portal Ltd",field:"",oldValue:"(row)",newValue:"(trashed)"}
+  ],
+  trash:[
+    {id:"l_x",deletedAt:dPlus(-1)+"T11:20",deletedBy:"Ankur",tab:"Logins",json:JSON.stringify({system:"HMRC PAYE",entity:"Old Portal Ltd",id:"l_x"})}
+  ],
   data:{
   Companies:[
-    {companyNo:"09214731",company:"Alderline Consulting Ltd",contact:"Sarah Okafor",sources:"accounts",utr:"4820193746",email:"sarah@alderline.example",phone:"07700 900112",address:"4 Priory Court, Reading RG1 3BX",incDate:"12/05/2017",authCode:"•••",ggId:"•••",ggPassword:"•••"},
-    {companyNo:"11482970",company:"Bright & Mason Joinery Ltd",contact:"Daniel Mason",sources:"accounts,vat",vatNo:"GB482910375",vatStagger:"Mar/Jun/Sep/Dec",utr:"9174028356",email:"dan@brightmason.example",phone:"07700 900543",address:"Unit 9, Fenton Trading Estate, Stoke-on-Trent ST4 2SD",incDate:"03/02/2019",authCode:"•••",ggId:"•••",ggPassword:"•••",ni:"•••",dob:"•••"},
+    {companyNo:"09214731",company:"Alderline Consulting Ltd",contact:"Sarah Okafor",sources:"accounts",utr:"4820193746",email:"sarah@alderline.example",phone:"07700 900112",address:"4 Priory Court, Reading RG1 3BX",incDate:"12/05/2017",authCode:"•••",ggId:"•••",ggPassword:"•••",id:"c_demo1",origin:"xlsx",status:"active",updatedAt:"2026-07-14T09:00:00.000Z",notes:"",services:"accounts"},
+    {companyNo:"11482970",company:"Bright & Mason Joinery Ltd",contact:"Daniel Mason",sources:"accounts,vat",vatNo:"GB482910375",vatStagger:"Mar/Jun/Sep/Dec",utr:"9174028356",email:"dan@brightmason.example",phone:"07700 900543",address:"Unit 9, Fenton Trading Estate, Stoke-on-Trent ST4 2SD",incDate:"03/02/2019",authCode:"•••",ggId:"•••",ggPassword:"•••",ni:"•••",dob:"•••",id:"c_demo2",origin:"vault",status:"active",updatedAt:"2026-07-13T14:20:00.000Z",notes:"Prefers email contact",services:"accounts,vat"},
     {companyNo:"08103366",company:"Caldwell Property Group Ltd",contact:"R. Caldwell",sources:"accounts",incDate:"22/08/2012",authCode:"•••"},
     {companyNo:"10577215",company:"Dartmoor Kitchens Ltd",contact:"Elena Rossi",sources:"accounts,vat",vatNo:"GB301758264",vatStagger:"Monthly",incDate:"14/11/2016",authCode:"•••",ggId:"•••",ggPassword:"•••"},
     {companyNo:"07992410",company:"Elm Row Dental Ltd",contact:"Dr K. Patel",sources:"accounts",incDate:"30/01/2011",authCode:"•••"},
@@ -481,6 +584,11 @@ async function demoApi(op,payload){
   await new Promise(r=>setTimeout(r,250));
   if(op==="reveal")return {ok:true,value:DEMO_VALUES[payload.field]||"SAMPLE"};
   if(op==="revealMisc")return {ok:true,rows:[["(sample)","Nothing on this screen is real"],["Barclays — office","20-00-00 · 12345678"],["Quickfile","admin@map.example · sample-only"]]};
+  if(op==="chLookup"){
+    if(/\d/.test(payload.q||""))return {ok:true,profile:{company:"Sample Findings Ltd",companyNo:"12345678",status:"active",incDate:"01/01/2020",address:"1 Demo Street, London EC1A 1BB",sic:"70229"},officers:[{name:"SAMPLE, Alex",role:"director",dob:"05/1985"},{name:"DEMO, Robin",role:"secretary",dob:"09/1978"}]};
+    return {ok:true,candidates:[{company:"Sample Alpha Ltd",companyNo:"11112222",status:"active",address:"1 Demo Street, London"},{company:"Sample Beta Trading Ltd",companyNo:"33334444",status:"active",address:"2 Demo Road, Leeds"}]};
+  }
+  if(WRITE_OPS[op])return {ok:true,id:"demo_new"};
   return {ok:true,state:demoState()};
 }
 function startDemo(){
@@ -520,7 +628,11 @@ function buildIndex(){
   (d.Pensions||[]).forEach(r=>{fanout(r.employer).forEach(c=>c.pension.push(r))});
   const list=[...clients.values()].filter(c=>c.name);
   list.sort((a,b)=>a.name.localeCompare(b.name));
-  IDX={clients:list,byKey:new Map(list.map(c=>[c.k,c])),people:[...people.values()]};
+  // accounts info from the year-end master sheet (MasterSheet mirror), keyed by
+  // normalised name so the dossier can show a client's full accounts picture.
+  const master=new Map();
+  (STATE.master||[]).forEach(r=>{const n=normName(r.company);if(n&&!master.has(n))master.set(n,r)});
+  IDX={clients:list,byKey:new Map(list.map(c=>[c.k,c])),people:[...people.values()],master};
 }
 const SRC_LABEL={accounts:"Accounts",vat:"VAT",credential:"Credentials only"};
 const SRC_CLS={accounts:"green",vat:"amber",credential:"gold"};
@@ -616,6 +728,7 @@ function paint(){
   STALEVIEW=false;
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===VIEWN));
   $("#searchwrap").style.display=(VIEWN==="home"||VIEWN==="clients")&&!DETAIL?"":"none";
+  $("#fab").style.display=(STATE&&(VIEWN==="home"||VIEWN==="clients")&&!DETAIL&&canAddTab("Companies"))?"flex":"none";
   const v=$("#view");
   if(!STATE){if(!CONNECTING)v.innerHTML=NOTCONN;return}   // during a cold load, keep the status card in place
   if(DETAIL){renderDetail(v);return}
@@ -765,10 +878,32 @@ function renderDetail(v){
     });
     h+='</div><div class="srcnote">Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(cv?" · VAT computed from the stagger":"")+"</div>";
   }
+  // Accounts info — live mirror of the year-end master sheet (read-only here)
+  const acct=IDX.master&&IDX.master.get(normName(c.name));
+  if(acct){
+    const ye=(acct.accountFrom||acct.accountTo)?((acct.accountFrom||"?")+" – "+(acct.accountTo||"?")):"";
+    const g=acctCell("Year end",ye)+acctCell("Accounts due",acct.accountsDue)+acctCell("CS deadline",acct.csDeadline)+
+      acctCell("Owner",acct.owner)+acctCell("Status",acct.acctStatus)+acctCell("IDV due",acct.idvDue)+
+      acctCell("Payroll",acct.payroll)+acctCell("Software",acct.software);
+    if(g){
+      h+='<div class="dsec" style="padding-top:2px"><div class="h3row"><h3>Accounts</h3>'+
+        '<a class="linkbtn mut" style="margin-left:auto" href="https://docs.google.com/spreadsheets/d/'+YE_SHEET_ID+'" target="_blank" rel="noopener">master sheet ↗</a></div>'+
+        '<div class="acctgrid">'+g+'</div>'+
+        (acct.followUp?'<div class="srcnote" style="padding:6px 0 0">Follow-up: '+esc(acct.followUp)+'</div>':"")+
+        (acct.codesHeld?'<div class="srcnote" style="padding:6px 0 0">Codes: '+esc(acct.codesHeld)+'</div>':"")+'</div>';
+    }
+  }
   h+='<div class="dsec">';
-  h+='<h3>Company details</h3>';
+  h+='<div class="h3row"><h3>Company details</h3>'+
+     (canEditTab("Companies")?'<button class="editpen" data-edit="'+esc(c.k)+'">'+IC("edit")+'Edit</button>':"")+'</div>';
   h+=factRow("Contact",r.contact,{plain:1})+factRow("UTR",r.utr)+factRow("VAT number",r.vatNo)+
-     factRow("Email",r.email)+factRow("Phone",r.phone)+factRow("Address",r.address,{plain:1});
+     factRow("Email",r.email)+factRow("Phone",r.phone)+factRow("Address",r.address,{plain:1})+
+     factRow("Services",r.services,{plain:1})+factRow("Notes",r.notes,{plain:1});
+  if(canAddTab("PersonalCodes")||canAddTab("Logins")){
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 2px">'+
+       (canAddTab("PersonalCodes")?'<button class="btn sm" data-addcode="'+esc(c.k)+'">'+IC("plus")+'Personal code</button>':"")+
+       (canAddTab("Logins")?'<button class="btn sm" data-addlogin="'+esc(c.k)+'">'+IC("plus")+'Login</button>':"")+'</div>';
+  }
   // Directors & PSCs — live from Companies House (public register data)
   const chp=c.no?(STATE.data.People||[]).filter(p=>normNo(p.companyNo)===normNo(c.no)):[];
   if(chp.length){
@@ -812,7 +947,8 @@ function renderDetail(v){
   }
   if(!secrets && !c.logins.length && !c.codes.length && !chp.length && !c.pension.length){
     h+='<div class="empty" style="padding:22px 4px">No codes, logins or CH people on file for this client yet.'+
-       '<br><span class="muted">We hold credentials only where we run this client\'s Companies House / HMRC filings.</span></div>';
+       '<br><span class="muted">We hold credentials only where we run this client\'s Companies House / HMRC filings.</span>'+
+       (canEditTab("Companies")?'<div style="margin-top:12px"><button class="btn sm" data-edit="'+esc(c.k)+'">'+IC("plus")+'Add credentials</button></div>':"")+'</div>';
   }
   h+="</div></div>";
   v.innerHTML=h;wire(v);
@@ -848,6 +984,18 @@ function renderMore(v){
       h+='<div class="locked"><span>'+IC("lock")+'<b>'+esc(msec.tab)+'</b> · '+msec.rows+' rows</span><button class="btn sm" data-misc="'+esc(msec.tab)+'">Open</button></div>';
     });
     h+="</div>";
+  }
+  if(STATE.role==="admin"&&STATE.changes){
+    h+='<div class="section"><h2>Recent changes</h2><span class="count2">'+STATE.changes.length+'</span></div><div class="card">';
+    h+=STATE.changes.length?STATE.changes.slice(0,60).map(chgRow).join(""):'<div class="empty" style="padding:22px">No edits yet</div>';
+    h+='</div>';
+    if(STATE.trash&&STATE.trash.length){
+      h+='<div class="section"><h2>Trash</h2><span class="count2">'+STATE.trash.length+'</span></div><div class="card">';
+      h+=STATE.trash.map(t=>'<div class="chgrow"><div class="cop remove">'+esc(t.tab)+'</div>'+
+        '<div style="flex:1;min-width:0">'+esc(trashName(t))+' <span class="muted">· '+esc(String(t.deletedAt||"").slice(0,10))+' by '+esc(t.deletedBy||"")+'</span></div>'+
+        '<button class="btn sm" data-restore="'+esc(t.id)+'">Restore</button></div>').join("");
+      h+='</div>';
+    }
   }
   h+='<div class="section"><h2>This device</h2></div><div class="card" style="padding:14px 16px;font-size:14px">'+
     'Signed in as <b>'+esc(STATE.me)+'</b> <span class="badge '+(STATE.role==="admin"?"admin":"")+'">'+esc(STATE.role)+'</span>'+
@@ -910,10 +1058,16 @@ function wire(v){
       b.closest(".locked").after(div);b.remove();
     }catch(err){b.textContent="Open";b.disabled=false;toast(err.message||"Failed")}
   });
+  v.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.edit);if(c)openEditDetails(c)});
+  v.querySelectorAll("[data-addcode]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.addcode);openAddCode(c?c.name:"")});
+  v.querySelectorAll("[data-addlogin]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.addlogin);openAddLogin(c?c.name:"")});
+  v.querySelectorAll("[data-restore]").forEach(b=>b.onclick=()=>{if(confirm("Restore this row from Trash?"))doWrite("restore",{id:b.dataset.restore},"Restored")});
   const rl=v.querySelector("#reloadBtn");if(rl)rl.onclick=()=>connect(true);
   const rc=v.querySelector("#reconnBtn");if(rc)rc.onclick=()=>showConnect();
 }
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{VIEWN=b.dataset.v;DETAIL=null;CAL.sel=null;Q="";$("#q").value="";$("#qclear").style.display="none";window.scrollTo(0,0);paint()});
+$("#fab").onclick=openWizard;
+$("#scrim2").addEventListener("click",e=>{if(e.target.id==="scrim2")closeModal2()});
 
 /* ---------- search ---------- */
 let qt;
@@ -924,24 +1078,220 @@ $("#q").addEventListener("input",e=>{
 $("#qclear").onclick=()=>{Q="";$("#q").value="";$("#qclear").style.display="none";paint()};
 
 /* ---------- connect modal ---------- */
-function showConnect(msg){
-  $("#mMsg").textContent=msg||"Paste your personal access code (from your invite link). It stays on this device only.";
+let ADMINMODE=false;
+function setAdmin(on){
+  ADMINMODE=on;
+  $("#mTeam").style.display=on?"none":"";
+  $("#mAdmin").style.display=on?"":"none";
+  $("#mToggle").textContent=on?"Use the team password instead":"Use an admin code instead";
+  $("#mTitle").textContent=on?"Admin sign-in":"Open the vault";
+  $("#mMsg").textContent=on?"Enter your personal admin access code. It stays on this device only."
+                            :"Enter the team password and your name. It stays on this device only.";
+}
+function showConnect(msg,teamNames){
   $("#mUrl").value=CFG.url||DEFAULT_API_URL;
-  $("#mCode").value=CFG.code||"";
+  $("#mName").value=CFG.who||"";
+  if(teamNames&&teamNames.length){
+    $("#teamlist").innerHTML=teamNames.map(n=>'<option value="'+esc(n)+'"></option>').join("");
+    $("#mChips").innerHTML=teamNames.map(n=>'<button type="button" data-nm="'+esc(n)+'">'+esc(n)+'</button>').join("");
+    $("#mChips").querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{$("#mName").value=b.dataset.nm;$("#mConnect").click()});
+  }else{ $("#mChips").innerHTML=""; }
+  setAdmin(ADMINMODE);
+  if(msg)$("#mMsg").textContent=msg;   // a custom / error message overrides the mode default
   $("#scrim").classList.add("on");
 }
 function closeConnect(){$("#scrim").classList.remove("on")}
 $("#mCancel").onclick=closeConnect;
 $("#mDemo").onclick=startDemo;
+$("#mToggle").onclick=()=>setAdmin(!ADMINMODE);
 $("#mConnect").onclick=()=>{
-  const code=$("#mCode").value.trim(), raw=$("#mUrl").value.trim();
-  if(!code){toast("Access code needed");return}
+  const raw=$("#mUrl").value.trim();
   if(raw&&!safeUrl(raw)){toast("That web app URL isn't a script.google.com address");return}
   const url=safeUrl(raw)||DEFAULT_API_URL;
+  let code,who;
+  if(ADMINMODE){ code=$("#mCode").value.trim(); who=""; if(!code){toast("Access code needed");return} }
+  else{ code=$("#mPass").value.trim(); who=$("#mName").value.trim();
+        if(!code){toast("Team password needed");return}
+        if(!who){toast("Enter your name");return} }
   if(code!==CFG.code||url!==CFG.url){clearCache();STATE=null;IDX=null;DETAIL=null;LASTSTR=null}
-  CFG.code=code;CFG.url=url;
+  CFG.code=code;CFG.url=url;CFG.who=who;
   saveJ(CFG_KEY,CFG);connect(true);
 };
+
+/* ---------- v2 write layer: permissions, modals, wizard, edits ---------- */
+function canAddTab(tab){ if(!STATE)return false; if(STATE.role==="admin")return true;
+  const w=(STATE.write||{})[STATE.role]||{}; return !!(w[tab]&&w[tab].add); }
+function canEditField(tab,field){ if(!STATE)return false; if(STATE.role==="admin")return true;
+  const t=((STATE.write||{})[STATE.role]||{})[tab]; return !!(t&&t.editFields&&t.editFields.includes(field)); }
+function canEditTab(tab){ if(!STATE)return false; if(STATE.role==="admin")return true;
+  const t=((STATE.write||{})[STATE.role]||{})[tab]; return !!(t&&t.editFields&&t.editFields.length); }
+function acctCell(l,v){ return v?'<div class="acctcell"><div class="al">'+esc(l)+'</div><div class="av">'+esc(v)+'</div></div>':""; }
+
+function openModal2(html){ $("#modal2").innerHTML=html; $("#scrim2").classList.add("on"); }
+function closeModal2(){ $("#scrim2").classList.remove("on"); $("#modal2").innerHTML=""; }
+function modalButtons(saveId,label,extra){
+  return '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'+(extra||"")+
+    '<button class="btn" id="m2Cancel" style="margin-right:auto">Cancel</button>'+
+    '<button class="btn primary" id="'+saveId+'">'+esc(label)+'</button></div>';
+}
+// Every write refreshes from the backend so the new/edited row (and rev) appear.
+async function doWrite(op,payload,okMsg){
+  if(DEMO){ toast("Sample mode — not saved"); closeModal2(); return; }
+  try{ await api(op,payload); toast(okMsg||"Saved"); closeModal2(); await connect(false); }
+  catch(err){ toast(err.message||"Couldn't save"); throw err; }
+}
+
+/* ----- New client wizard ----- */
+const WIZ={step:1,data:{},officers:[]};
+function openWizard(){ WIZ.step=1; WIZ.data={}; WIZ.officers=[]; renderWizard(); $("#scrim2").classList.add("on"); }
+function renderWizard(){
+  const d=WIZ.data;
+  let h='<div class="steps"><div class="st'+(WIZ.step>=1?" on":"")+'"></div><div class="st'+(WIZ.step>=2?" on":"")+'"></div><div class="st'+(WIZ.step>=3?" on":"")+'"></div></div>';
+  if(WIZ.step===1){
+    h+='<h2>New client · find on Companies House</h2><p>Search by name or number to autofill, or skip for a sole trader / non-CH entity.</p>';
+    h+='<div class="field"><input id="wzq" placeholder="Company name or number" value="'+esc(d._q||"")+'"></div><div id="wzres"></div>';
+    h+='<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px">'+
+       '<button class="btn" id="wzCancel" style="margin-right:auto">Cancel</button>'+
+       '<button class="btn" id="wzSkip">Skip / not on CH</button>'+
+       '<button class="btn primary" id="wzSearch">Search</button></div>';
+  }else if(WIZ.step===2){
+    h+='<h2>New client · details</h2>';
+    if(d.companyNo)h+='<p><b>'+esc(d.company)+'</b> · <span class="mono">#'+esc(d.companyNo)+'</span>'+(d.status?" · "+esc(d.status):"")+'</p>';
+    else h+='<div class="field"><label>Company / trading name *</label><input id="wf_company" value="'+esc(d.company||"")+'"></div>';
+    h+='<div class="frow"><div class="field"><label>Contact</label><input id="wf_contact" value="'+esc(d.contact||"")+'"></div>'+
+       '<div class="field"><label>Phone</label><input id="wf_phone" value="'+esc(d.phone||"")+'"></div></div>';
+    h+='<div class="field"><label>Email</label><input id="wf_email" value="'+esc(d.email||"")+'"></div>';
+    h+='<div class="frow"><div class="field"><label>UTR</label><input id="wf_utr" value="'+esc(d.utr||"")+'"></div>'+
+       '<div class="field"><label>VAT number</label><input id="wf_vatNo" value="'+esc(d.vatNo||"")+'"></div></div>';
+    h+='<div class="field"><label>Services</label><input id="wf_services" placeholder="accounts, vat, payroll…" value="'+esc(d.services||"")+'"></div>';
+    h+='<div class="field"><label>Notes</label><textarea id="wf_notes">'+esc(d.notes||"")+'</textarea></div>';
+    if(WIZ.officers.length)h+='<p class="muted" style="font-size:12.5px">'+WIZ.officers.length+' director(s)/PSC(s) from Companies House will be saved too.</p>';
+    h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="btn" id="wzBack" style="margin-right:auto">Back</button><button class="btn primary" id="wzNext">Next</button></div>';
+  }else{
+    h+='<h2>New client · credentials <span class="muted" style="font-weight:400;font-size:13px">(optional)</span></h2><p>Add now or later. Write-only — saved masked, revealed only with an audit line.</p>';
+    h+='<div class="field"><label>Companies House auth code</label><input id="wf_authCode" value="'+esc(d.authCode||"")+'"></div>';
+    h+='<div class="frow"><div class="field"><label>Gov Gateway ID</label><input id="wf_ggId" value="'+esc(d.ggId||"")+'"></div>'+
+       '<div class="field"><label>GG password</label><input id="wf_ggPassword" value="'+esc(d.ggPassword||"")+'"></div></div>';
+    h+='<div class="field"><label>Registered address</label><textarea id="wf_address">'+esc(d.address||"")+'</textarea></div>';
+    h+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="btn" id="wzBack" style="margin-right:auto">Back</button><button class="btn primary" id="wzSave">Save client</button></div>';
+  }
+  $("#modal2").innerHTML=h; wireWizard();
+}
+function collectWizard(){
+  const d=WIZ.data;
+  ["contact","phone","email","utr","vatNo","services","notes","authCode","ggId","ggPassword","address"].forEach(f=>{const el=$("#wf_"+f);if(el)d[f]=el.value.trim()});
+  const cel=$("#wf_company"); if(cel)d.company=cel.value.trim();
+}
+function wireWizard(){
+  const c=$("#wzCancel"); if(c)c.onclick=closeModal2;
+  const b=$("#wzBack"); if(b)b.onclick=()=>{collectWizard();WIZ.step--;renderWizard()};
+  const sk=$("#wzSkip"); if(sk)sk.onclick=()=>{WIZ.data={};WIZ.officers=[];WIZ.step=2;renderWizard()};
+  const s=$("#wzSearch"); if(s)s.onclick=doWizSearch;
+  const n=$("#wzNext"); if(n)n.onclick=()=>{collectWizard();if(!WIZ.data.company){toast("Company name needed");return}WIZ.step=3;renderWizard()};
+  const sv=$("#wzSave"); if(sv)sv.onclick=doWizSave;
+  const q=$("#wzq"); if(q)q.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();doWizSearch()}};
+}
+async function doWizSearch(){
+  const q=$("#wzq").value.trim(); WIZ.data._q=q;
+  if(!q){toast("Type a name or number");return}
+  const res=$("#wzres"); res.innerHTML='<p class="muted">Searching Companies House…</p>';
+  try{
+    const j=await api("chLookup",{q});
+    if(j.profile){ applyProfile(j.profile,j.officers); return; }
+    const items=j.candidates||[];
+    if(!items.length){ res.innerHTML='<p class="muted">No matches. Check the spelling, or Skip to enter manually.</p>'; return; }
+    res.innerHTML='<div style="margin-top:8px">'+items.map((it,i)=>'<div class="pickrow" data-pick="'+i+'"><div class="pmain"><div class="pn">'+esc(it.company)+'</div><div class="ps">#'+esc(it.companyNo)+' · '+esc(it.status)+(it.address?" · "+esc(it.address):"")+'</div></div>'+IC("chev-r")+'</div>').join("")+'</div>';
+    res.querySelectorAll("[data-pick]").forEach(el=>el.onclick=async()=>{
+      const it=items[+el.dataset.pick]; res.innerHTML='<p class="muted">Fetching '+esc(it.company)+'…</p>';
+      try{ const j2=await api("chLookup",{q:it.companyNo}); applyProfile(j2.profile,j2.officers); }
+      catch(e){ res.innerHTML='<p class="muted">'+esc(e.message||"lookup failed")+'</p>'; }
+    });
+  }catch(e){ res.innerHTML='<p class="muted">'+esc(e.message||"lookup failed")+' — you can Skip and type it in.</p>'; }
+}
+function applyProfile(p,officers){
+  if(!p)return;
+  WIZ.data=Object.assign({},WIZ.data,{company:p.company,companyNo:p.companyNo,status:p.status,incDate:p.incDate,address:p.address});
+  WIZ.officers=(officers||[]).map(o=>({name:o.name,role:o.role,dob:o.dob}));
+  WIZ.step=2; renderWizard();
+}
+function doWizSave(){
+  collectWizard();
+  const d=WIZ.data, fields={};
+  ["company","companyNo","contact","incDate","utr","vatNo","address","email","phone","authCode","ggId","ggPassword","notes","services"].forEach(f=>{if(d[f])fields[f]=d[f]});
+  if(!fields.company){toast("Company name needed");WIZ.step=2;renderWizard();return}
+  doWrite("add",{tab:"Companies",fields:fields,officers:WIZ.officers},"Client added — it will appear on the master sheet shortly");
+}
+
+/* ----- quick-adds ----- */
+function openAddCode(prefillCompany){
+  openModal2('<h2>Add a personal code</h2>'+
+    '<div class="field"><label>Person *</label><input id="pc_person"></div>'+
+    '<div class="field"><label>Company</label><input id="pc_company" value="'+esc(prefillCompany||"")+'"></div>'+
+    '<div class="frow"><div class="field"><label>Verified on</label><input id="pc_verifiedOn" placeholder="DD/MM/YYYY"></div>'+
+    '<div class="field"><label>Invoiced</label><input id="pc_invoiced" placeholder="yes / no"></div></div>'+
+    '<div class="field"><label>Personal code</label><input id="pc_personalCode" placeholder="XXXX-XXXX-XXXX"></div>'+
+    '<div class="field"><label>Email</label><input id="pc_email"></div>'+
+    modalButtons("pcSave","Save code"));
+  $("#m2Cancel").onclick=closeModal2;
+  $("#pcSave").onclick=()=>{ const f={};
+    ["person","company","verifiedOn","invoiced","personalCode","email"].forEach(k=>{const el=$("#pc_"+k);if(el&&el.value.trim())f[k]=el.value.trim()});
+    if(!f.person){toast("Person needed");return}
+    doWrite("add",{tab:"PersonalCodes",fields:f},"Personal code added"); };
+}
+function openAddLogin(prefillEntity){
+  const systems=[...new Set((STATE.data.Logins||[]).map(l=>l.system).filter(Boolean))].sort();
+  openModal2('<h2>Add a login</h2>'+
+    '<div class="field"><label>System *</label><input id="lg_system" list="syslist" placeholder="e.g. HMRC VAT (GG)"><datalist id="syslist">'+systems.map(s=>'<option value="'+esc(s)+'"></option>').join("")+'</datalist></div>'+
+    '<div class="field"><label>Entity *</label><input id="lg_entity" value="'+esc(prefillEntity||"")+'"></div>'+
+    '<div class="frow"><div class="field"><label>Username</label><input id="lg_username"></div><div class="field"><label>Password</label><input id="lg_password"></div></div>'+
+    '<div class="field"><label>Email</label><input id="lg_email"></div>'+
+    '<div class="field"><label>Notes</label><textarea id="lg_notes"></textarea></div>'+
+    modalButtons("lgSave","Save login"));
+  $("#m2Cancel").onclick=closeModal2;
+  $("#lgSave").onclick=()=>{ const f={};
+    ["system","entity","username","password","email","notes"].forEach(k=>{const el=$("#lg_"+k);if(el&&el.value.trim())f[k]=el.value.trim()});
+    if(!f.system||!f.entity){toast("System and entity needed");return}
+    doWrite("add",{tab:"Logins",fields:f},"Login added"); };
+}
+
+/* ----- edit a company (details + write-only credentials + admin delete) ----- */
+function openEditDetails(c){
+  const r=c.c||{};
+  const F=[["contact","Contact"],["email","Email"],["phone","Phone"],["address","Address"],["services","Services"],["status","Status"],["notes","Notes"]];
+  let h='<h2>Edit '+esc(c.name)+'</h2>';
+  h+=F.map(([k,l])=>{ const lock=!canEditField("Companies",k); const ta=(k==="address"||k==="notes");
+    const inp=ta?'<textarea id="ed_'+k+'"'+(lock?" disabled":"")+'>'+esc(r[k]||"")+'</textarea>'
+                :'<input id="ed_'+k+'" value="'+esc(r[k]||"")+'"'+(lock?" disabled":"")+(k==="status"?' placeholder="active / dormant / disengaged"':"")+'>';
+    return '<div class="field'+(lock?" lock":"")+'"><label>'+esc(l)+(lock?' <span class="muted">· admins only</span>':"")+'</label>'+inp+'</div>'; }).join("");
+  if(STATE.role==="admin"){
+    h+='<div class="h3row"><h3>Credentials · leave blank to keep</h3></div>';
+    [["authCode","CH auth code"],["ggId","Gov Gateway ID"],["ggPassword","GG password"],["ni","NI number"],["dob","Date of birth"]].forEach(([k,l])=>{
+      h+='<div class="field"><label>'+esc(l)+'</label><input id="ed_'+k+'" placeholder="'+(r[k]==="•••"?"set — type to replace":"not set")+'"></div>'; });
+  }
+  h+=modalButtons("edSave","Save changes",STATE.role==="admin"?'<button class="btn" id="edDel" style="color:var(--red);border-color:var(--redbg)">'+IC("trash")+'Delete</button>':"");
+  openModal2(h);
+  $("#m2Cancel").onclick=closeModal2;
+  const del=$("#edDel"); if(del)del.onclick=()=>{ if(!r.id){toast("Unavailable until migration");return}
+    if(confirm("Move "+c.name+" to Trash? An admin can restore it.")) doWrite("remove",{tab:"Companies",id:r.id},"Moved to Trash"); };
+  $("#edSave").onclick=()=>{
+    if(!r.id){toast("Saving is unavailable until the sheet is migrated");return}
+    const fields={};
+    F.forEach(([k])=>{const el=$("#ed_"+k);if(el&&!el.disabled){const val=el.value.trim();if(val!==String(r[k]||""))fields[k]=val;}});
+    if(STATE.role==="admin")["authCode","ggId","ggPassword","ni","dob"].forEach(k=>{const el=$("#ed_"+k);if(el&&el.value.trim())fields[k]=el.value.trim();});
+    if(!Object.keys(fields).length){toast("No changes");return}
+    doWrite("update",{tab:"Companies",id:r.id,fields:fields,baseUpdatedAt:r.updatedAt||""},"Saved");
+  };
+}
+
+/* ----- changes feed helpers (admin) ----- */
+function chgRow(c){
+  return '<div class="chgrow"><div class="ct">'+esc(String(c.when||"").slice(5,16).replace("T"," "))+'</div>'+
+    '<div class="cop '+esc(c.op)+'">'+esc(c.op)+'</div>'+
+    '<div style="flex:1;min-width:0"><div>'+esc(c.entity||c.tab)+(c.field?' · <span class="muted">'+esc(c.field)+'</span>':"")+'</div>'+
+    (c.newValue&&c.newValue!=="(created)"&&c.newValue!=="•••"?'<div class="muted" style="font-size:11px">'+esc(c.oldValue||"—")+' → '+esc(c.newValue)+'</div>':"")+'</div>'+
+    '<div class="ct" style="width:auto;text-align:right">'+esc(c.who||"")+'</div></div>';
+}
+function trashName(t){ try{const o=JSON.parse(t.json);return o.company||o.person||o.entity||o.employer||t.id;}catch(e){return t.id;} }
 
 /* ---------- theme + boot ---------- */
 $("#themeBtn").onclick=()=>{
