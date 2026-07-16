@@ -289,6 +289,17 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 .chgrow .cop.add{color:var(--green)}.chgrow .cop.remove{color:var(--red)}.chgrow .cop.update{color:var(--accent)}.chgrow .cop.restore{color:var(--gold)}
 .tag{font-size:11px;font-weight:650;padding:2px 7px;border-radius:6px;background:var(--chip);color:var(--mut)}
 .tag.vault{background:var(--accent-soft);color:var(--accent)}
+.pill .ic{width:12px;height:12px;vertical-align:-2px;display:inline-block}
+.pill.mut{background:var(--chip);color:var(--mut)}
+.stagegrid{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 12px}
+.stagegrid button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:8px 13px;font-size:13px;font-weight:600;color:var(--mut)}
+.stagegrid button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+@media(hover:hover){.stagegrid button:not(.on):hover{border-color:var(--accent);color:var(--accent)}}
+.ownerrow{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 12px}
+.ownerrow button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--mut)}
+.ownerrow button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.possible{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13px}
+.possible .why{font-size:11.5px;color:var(--mut);margin-top:2px}
 </style>
 </head>
 <body>
@@ -394,7 +405,99 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clea
 function setConn(s){$("#conn").className="conn"+(s?" "+s:"")}
 function copyTxt(v){navigator.clipboard.writeText(v).then(()=>toast("Copied"),()=>toast("Copy failed"))}
 function normNo(n){const s=String(n||"").replace(/\D/g,"");return s.replace(/^0+/,"")}
-function normName(s){return String(s||"").toLowerCase().replace(/\b(ltd|limited|llp|plc|the)\b/g," ").replace(/[^a-z0-9]+/g," ").trim()}
+// KEEP IN LOCKSTEP with Code.gs normNameJs + CloudTick normName: strip leading list
+// numbering ("1. Plutus…"), treat & as "and", drop ltd/limited/llp/plc/the.
+function normName(s){return String(s||"").toLowerCase().replace(/^\d+[.)]\s*/,"").replace(/&/g," and ").replace(/\b(ltd|limited|llp|plc|the)\b/g," ").replace(/[^a-z0-9]+/g," ").trim()}
+
+/* ---------- workflow stage model (grounded in the master sheet's real Status values) ---------- */
+const STAGES=[
+  ["Not Started","mut"],["Records Requested","amber"],["Emailed","amber"],["Received Statements","blue"],
+  ["In Progress","blue"],["Sent Query","amber"],["Drafted","blue"],["Sent for Confirmation","gold"],
+  ["Received Confirmation","green"],["Submitted","green"],["Sent Invoice","green"],["Filed","green"],
+  ["Dormant","mut"],["Do Not Email","red"]
+];
+const CHASE_STAGES=new Set(["Records Requested","Emailed","Sent Query"]);   // auto-date on save
+// Parse a free-text sheet status into {stage, sep, detail, cls}. Longest canonical
+// prefix wins; anything unrecognised keeps its FULL text as detail (one-off notes
+// like "Takeover received…" and Do-Not-Email routing instructions are operational
+// data and must never be lost). `sep` captures the exact separator characters so
+// stage+sep+detail reproduces the ORIGINAL string byte-for-byte — without it,
+// "Do Not Email - Wise bank access (Dani) - statements via Wise/UBL…" would be
+// silently rewritten as "Do Not Email Wise bank access…" on any save.
+function parseStatus(s){
+  const t=String(s||"").trim();
+  if(!t)return {stage:"",sep:"",detail:"",cls:"mut"};
+  const low=t.toLowerCase();
+  let best=null;
+  for(const [st,cls] of STAGES){ if(low.startsWith(st.toLowerCase())&&(!best||st.length>best[0].length))best=[st,cls]; }
+  if(best){
+    const rest=t.slice(best[0].length);
+    const sep=(rest.match(/^[\s:—–-]*/)||[""])[0];
+    return {stage:best[0],sep:sep,detail:rest.slice(sep.length),cls:best[1]};
+  }
+  return {stage:"Other",sep:"",detail:t,cls:"mut"};
+}
+function stageChip(status,{full=false}={}){
+  const p=parseStatus(status);
+  if(!p.stage)return"";
+  const label=full&&p.detail?p.stage+" · "+p.detail:p.stage;
+  const c=p.cls==="blue"?"":p.cls;   // blue = default accent pill
+  return '<span class="pill '+esc(c)+'" title="'+esc(status)+'">'+esc(label)+"</span>";
+}
+const OWNERS=["Ankur","Priyanka","Ronak","Suman","Bhavya"];
+function todayDMY(){const d=new Date(),p=x=>String(x).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()}
+
+/* ---------- person identity (display-layer only — reveals stay exact-match) ----------
+ * CH writes "PATEL, Amitkumar Arvindbhai" / "Mr Amitkumar Patel"; the codes sheet
+ * writes "Amit Patel" / "Patel Dhaval" / ALLCAPS. Exact identity = the SAME name
+ * tokens in ANY order (titles stripped) — order-proof and case-proof, but never
+ * merges different names. Looser similarity (Amit ~ Amitkumar) is only ever shown
+ * as a labelled "possibly the same person" suggestion, never silently merged —
+ * spouses/siblings share surnames and near-identical given names here.        */
+const TITLES=new Set(["mr","mrs","ms","miss","dr","mx","sir"]);
+function pTokens(name){
+  let s=String(name||"").toLowerCase();
+  const parts=s.split(",");
+  if(parts.length>2)s=parts.slice(0,2).join(" ");   // "SHAH, Maitri, Mrs." -> drop trailing title
+  s=s.replace(/,/g," ").replace(/\./g," ");
+  return s.split(/[^a-z0-9'-]+/).map(t=>t.replace(/^['-]+|['-]+$/g,"")).filter(t=>t&&!TITLES.has(t)).sort();
+}
+function pKey(name){return pTokens(name).join(" ")}
+function displayName(name){
+  const raw=String(name||"").trim();
+  const m=raw.match(/^([^,]+),\s*(.+)$/);
+  if(m&&!/^(mr|mrs|ms|miss|dr)\b/i.test(m[1])){
+    const rest=m[2].replace(/,\s*(mr|mrs|ms|miss|dr)\.?\s*$/i,"").trim();
+    return rest+" "+m[1].trim();                    // "PATEL, Amitkumar" -> "Amitkumar PATEL"
+  }
+  return raw;
+}
+function dedupePeople(rows){
+  const out=[],byK=new Map();
+  rows.forEach(r=>{
+    const k=pKey(r.name);
+    const prev=byK.get(k);
+    if(prev&&(!prev.dob||!r.dob||prev.dob===r.dob)){
+      if(prev.role.indexOf(r.role)<0)prev.role="Director & PSC";
+      if(!prev.idv&&r.idv)prev.idv=r.idv;
+      if(!prev.dob&&r.dob)prev.dob=r.dob;
+    }else{const cp=Object.assign({},r);byK.set(k,cp);out.push(cp)}
+  });
+  return out;
+}
+// Conservative similarity for the labelled suggestions section: share >=1 exact
+// token AND >=1 prefix-pair (>=4 chars) among the remaining tokens.
+function possiblySame(a,b){
+  if(a.key===b.key)return null;
+  const shared=a.tokens.filter(t=>b.tokens.includes(t));
+  if(!shared.length)return null;
+  for(const ta of a.tokens){ if(shared.includes(ta))continue;
+    for(const tb of b.tokens){ if(shared.includes(tb))continue;
+      if(ta.length>=4&&tb.length>=4&&(ta.startsWith(tb)||tb.startsWith(ta))&&ta!==tb)
+        return "shares “"+shared.join("”, “")+"” · “"+ta+"” matches “"+tb+"”";
+    }}
+  return null;
+}
 function initials(s){const w=String(s||"?").split(/\s+/).filter(Boolean);return ((w[0]||"?")[0]+(w[1]?w[1][0]:"")).toUpperCase()}
 function parseDMY(s){if(!s)return null;const p=String(s).split("/");if(p.length!==3)return null;const d=new Date(+p[2],+p[1]-1,+p[0]);return isNaN(d)?null:d}
 function daysTo(s){const d=parseDMY(s);if(!d)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/86400000)}
@@ -513,16 +616,20 @@ function dPlus(n){const d=new Date();d.setDate(d.getDate()+n);const p=x=>String(
 function demoState(){
   const ref=dPlus(-1)+" 07:15";
   return {me:"Sample data",role:"admin",staffReveal:[],lastSync:dPlus(0)+" 06:40",
+  chSweep:"idle · last full sweep "+dPlus(-1)+" 07:40",lastCloudTick:new Date().toISOString(),
   misc:{"HMRC contact numbers":[["Agent dedicated line","0300 200 3311"],["VAT general enquiries","0300 200 3700"],["PAYE for employers","0300 200 3200"]],
         "Companies House fees":[["CS01 confirmation statement","£34"],["Change of name","£20"],["DS01 strike-off","£33"]]},
   miscSecret:[{tab:"Bank details",rows:14},{tab:"Quickfile log in",rows:6}],
   teamNames:["Priyanka","Ronak","Bhavya"],
   write:{admin:{"*":"all"},staff:{Companies:{add:true,editFields:["contact","email","phone","address","notes","services","status"]},PersonalCodes:{add:true,editFields:["invoiced","email","notes","status"]},Logins:{add:true,editFields:["notes","email","phone","status"]},Pensions:{add:true,editFields:["notes","status"]}}},
   master:[
-    {company:"Alderline Consulting Ltd",accountFrom:"01/11/2024",accountTo:"31/10/2025",accountsDue:dPlus(9),csDeadline:dPlus(48),owner:"Priyanka",acctStatus:"Active",idvDue:"—",payroll:"No",software:"TaxCalc",followUp:"Awaiting October bank statements"},
-    {company:"Bright & Mason Joinery Ltd",accountFrom:"01/10/2024",accountTo:"30/09/2025",accountsDue:dPlus(26),csDeadline:dPlus(64),owner:"Ronak",acctStatus:"Active",idvDue:dPlus(80),payroll:"Yes",software:"VT",codesHeld:"MASON, Daniel: CTL-XXXX-XXXX"},
-    {company:"Dartmoor Kitchens Ltd",accountFrom:"01/12/2024",accountTo:"30/11/2025",accountsDue:dPlus(55),csDeadline:dPlus(12),owner:"Priyanka",acctStatus:"Active",payroll:"No"}
+    {company:"Alderline Consulting Ltd",accountFrom:"01/11/2024",accountTo:"31/10/2025",accountsDue:dPlus(9),csDeadline:dPlus(48),owner:"Priyanka",acctStatus:"Records Requested "+dPlus(-12),idvDue:"—",payroll:"No",software:"TaxCalc",followUp:"Awaiting October bank statements"},
+    {company:"Bright & Mason Joinery Ltd",accountFrom:"01/10/2024",accountTo:"30/09/2025",accountsDue:dPlus(26),csDeadline:dPlus(64),owner:"Ronak",acctStatus:"In Progress",idvDue:dPlus(80),payroll:"Yes",software:"VT",codesHeld:"MASON, Daniel: CTL-XXXX-XXXX"},
+    {company:"Dartmoor Kitchens Ltd",accountFrom:"01/12/2024",accountTo:"30/11/2025",accountsDue:dPlus(55),csDeadline:dPlus(12),owner:"Priyanka",acctStatus:"Submitted",payroll:"No"},
+    {company:"Kestrel Marine Ltd",accountFrom:"01/08/2024",accountTo:"31/07/2025",accountsDue:dPlus(2),csDeadline:dPlus(150),owner:"Ankur",acctStatus:"Sent for Confirmation",payroll:"No"},
+    {company:"Elm Row Dental Ltd",accountFrom:"01/04/2025",accountTo:"31/03/2026",accountsDue:dPlus(120),csDeadline:dPlus(5),acctStatus:"Do Not Email - statements via Wise (Dani) - do not chase",payroll:"Yes"}
   ],
+  outboxErrors:[],
   changes:[
     {when:dPlus(0)+"T09:14",who:"Bhavya (team)",op:"add",tab:"PersonalCodes",id:"p_x1",entity:"Priya Chandra",field:"",oldValue:"",newValue:"(created)"},
     {when:dPlus(0)+"T09:02",who:"Priyanka (team)",op:"update",tab:"Companies",id:"c_demo1",entity:"Alderline Consulting Ltd",field:"email",oldValue:"old@alderline.example",newValue:"sarah@alderline.example"},
@@ -588,6 +695,14 @@ async function demoApi(op,payload){
     if(/\d/.test(payload.q||""))return {ok:true,profile:{company:"Sample Findings Ltd",companyNo:"12345678",status:"active",incDate:"01/01/2020",address:"1 Demo Street, London EC1A 1BB",sic:"70229"},officers:[{name:"SAMPLE, Alex",role:"director",dob:"05/1985"},{name:"DEMO, Robin",role:"secretary",dob:"09/1978"}]};
     return {ok:true,candidates:[{company:"Sample Alpha Ltd",companyNo:"11112222",status:"active",address:"1 Demo Street, London"},{company:"Sample Beta Trading Ltd",companyNo:"33334444",status:"active",address:"2 Demo Road, Leeds"}]};
   }
+  if(op==="chRefreshOne"){
+    const no=payload.companyNo;
+    const cur=(STATE.data.Deadlines||[]).find(r=>normNo(r.companyNo)===normNo(no))||{};
+    return {ok:true,deadlines:Object.assign({},cur,{companyNo:no,company:cur.company||"Sample Ltd",status:"active",chRefreshed:dPlus(0)}),
+            people:(STATE.data.People||[]).filter(p=>normNo(p.companyNo)===normNo(no))};
+  }
+  if(op==="chSweepStart")return {ok:true,status:"queued (sample)"};
+  if(op==="updateAccounts")return {ok:true,changed:Object.keys(payload.fields||{})};
   if(WRITE_OPS[op])return {ok:true,id:"demo_new"};
   return {ok:true,state:demoState()};
 }
@@ -619,11 +734,47 @@ function buildIndex(){
   byName.forEach((arr,n)=>{if(arr.length>1)console.warn("MAP Vault: "+arr.length+" clients share normalised name "+JSON.stringify(n)+" — related rows attached to all; disambiguate in the sheet")});
   const fanout=name=>byName.get(normName(name))||[];
   (d.Logins||[]).forEach(r=>{const cs=fanout(r.entity);if(cs.length)cs.forEach(c=>c.logins.push(r));else client("",r.entity).logins.push(r)});
+  // The PersonalCodes company field is free text and often a LIST of shorthand
+  // names ("Dev Sky , Shree Dev , Dev Bristol Ltd"). Split on , and / and attach
+  // each fragment: exact normalised match first, else a UNIQUE prefix match
+  // (ambiguous fragments attach nowhere — never guess between two clients).
+  const allClients=[...clients.values()];
+  function attachByFragment(txt){
+    const out=new Set();
+    String(txt||"").split(/[,\/]/).map(s=>s.trim()).filter(Boolean).forEach(frag=>{
+      const n=normName(frag);
+      if(!n)return;
+      const exact=byName.get(n);
+      if(exact){exact.forEach(c=>out.add(c));return}
+      if(n.length>=4){
+        const hits=allClients.filter(c=>{const cn=normName(c.name);return cn.startsWith(n+" ")||cn===n||(n.length>=6&&cn.includes(n))});
+        if(hits.length===1)out.add(hits[0]);
+      }
+    });
+    return [...out];
+  }
   (d.PersonalCodes||[]).forEach(r=>{
-    fanout(r.company).forEach(c=>c.codes.push(r));
-    const pk=r.person.trim().toLowerCase();
-    if(!people.has(pk))people.set(pk,{person:r.person,entries:[]});
-    people.get(pk).entries.push(r);
+    const pk=pKey(r.person);
+    let P=null;
+    if(pk){
+      if(!people.has(pk))people.set(pk,{key:pk,person:displayName(r.person),tokens:pTokens(r.person),entries:[],ch:[],codeClients:new Set()});
+      P=people.get(pk);P.entries.push(r);
+    }
+    attachByFragment(r.company).forEach(c=>{
+      if(!c.codes.includes(r))c.codes.push(r);
+      if(P)P.codeClients.add(c.k);
+    });
+  });
+  // CH directors/PSCs join the SAME people index, so searching "Amit Patel" finds
+  // "PATEL, Amitkumar" profiles and their companies (exact merge = identical name
+  // tokens in any order; anything looser is only ever a labelled "possible match").
+  (d.People||[]).forEach(r=>{
+    const pk=pKey(r.name);
+    if(!pk)return;
+    if(!people.has(pk))people.set(pk,{key:pk,person:displayName(r.name),tokens:pTokens(r.name),entries:[],ch:[],codeClients:new Set()});
+    const P=people.get(pk);
+    if(!P.ch.some(x=>normNo(x.companyNo)===normNo(r.companyNo)&&x.role===r.role))P.ch.push(r);
+    if(P.person.includes(",")&&!displayName(r.name).includes(","))P.person=displayName(r.name);
   });
   (d.Pensions||[]).forEach(r=>{fanout(r.employer).forEach(c=>c.pension.push(r))});
   const list=[...clients.values()].filter(c=>c.name);
@@ -717,8 +868,11 @@ function dlFiltered(items){
 }
 function dlRow(i){
   const cls=dueClass(i.days,i.o),nt=dueNote(i.days,i.o);
+  const acct=clientAcct(i.c);
+  const stage=acct&&acct.acctStatus?stageChip(acct.acctStatus):"";
+  const ow=acct&&acct.owner?" · "+esc(acct.owner):"";
   return '<div class="row" data-open="'+esc(i.c.k)+'"><div class="avatar '+i.t+'">'+esc(initials(i.c.name))+'</div>'+
-    '<div class="rmain"><div class="rname">'+esc(i.c.name)+'</div><div class="rsub">'+esc(i.label)+' · '+esc(i.sub)+'</div></div>'+
+    '<div class="rmain"><div class="rname">'+esc(i.c.name)+'</div><div class="rsub">'+esc(i.label)+' · '+esc(i.sub)+ow+'</div></div>'+stage+
     '<span class="pill '+cls+'">'+esc(i.due)+(nt?" · "+esc(nt):"")+'</span><span class="chev">'+IC("chev-r")+"</span></div>";
 }
 function srcNote(t){return '<div class="srcnote" style="padding:12px 4px 0">'+t+"</div>"}
@@ -739,27 +893,52 @@ function paint(){
 }
 function renderSkeleton(){$("#view").innerHTML='<div class="skel" style="margin-top:14px"></div><div class="skel" style="margin-top:12px"></div>'}
 
+function clientAcct(c){return IDX.master?IDX.master.get(normName(c.name)):null}
 function clientRow(c){
   const nd=nextDue(c);
+  const acct=clientAcct(c);
   const pill=nd?'<span class="pill '+dueClass(nd.days,nd.o)+'">'+esc(nd.t)+" "+esc(nd.s)+"</span>":"";
+  const stage=acct&&acct.acctStatus?stageChip(acct.acctStatus):"";
   return '<div class="row" data-open="'+esc(c.k)+'"><div class="avatar">'+esc(initials(c.name))+'</div>'+
     '<div class="rmain"><div class="rname">'+esc(c.name)+'</div><div class="rsub">'+esc(c.no?("#"+c.no):"")+
-    (c.c&&c.c.contact?" · "+esc(c.c.contact):"")+"</div></div>"+pill+'<span class="chev">'+IC("chev-r")+"</span></div>";
+    (acct&&acct.owner?" · "+esc(acct.owner):(c.c&&c.c.contact?" · "+esc(c.c.contact):""))+"</div></div>"+stage+pill+'<span class="chev">'+IC("chev-r")+"</span></div>";
 }
 
 function searchResults(){
-  const q=Q.toLowerCase();
+  const q=Q.toLowerCase().trim();
   const qd=q.replace(/\D/g,"");
-  const cs=IDX.clients.filter(c=>
-    c.name.toLowerCase().includes(q)||(qd&&c.no.includes(qd))||
-    (c.c&&((c.c.contact||"").toLowerCase().includes(q)||(c.c.vatNo||"").toLowerCase().includes(q)||(c.c.email||"").toLowerCase().includes(q)))
-  ).slice(0,40);
-  const ps=IDX.people.filter(p=>p.person.toLowerCase().includes(q)).slice(0,12);
+  const qToks=q.split(/[^a-z0-9@.'-]+/).filter(Boolean);
+  // clients: rank exact-prefix name hits above substring hits above field hits;
+  // ALL query tokens must appear somewhere in the client's searchable text
+  function hay(c){const r=c.c||{};
+    return (c.name+" "+(r.contact||"")+" "+(r.email||"")+" "+(r.vatNo||"")+" "+(r.utr||"")+" "+(r.address||"")+" "+(r.phone||"")+" "+(r.notes||"")).toLowerCase();}
+  const scored=[];
+  IDX.clients.forEach(c=>{
+    const nm=c.name.toLowerCase(),hs=hay(c);
+    let s=-1;
+    if(nm.startsWith(q))s=0;
+    else if(nm.includes(q))s=1;
+    else if(qd&&qd.length>=4&&c.no.includes(qd))s=1;
+    else if(qToks.length&&qToks.every(t=>hs.includes(t)))s=2;
+    if(s>=0)scored.push([s,c]);
+  });
+  scored.sort((a,b)=>a[0]-b[0]||a[1].name.localeCompare(b[1].name));
+  const cs=scored.map(x=>x[1]).slice(0,40);
+  // people: every query token must prefix-match one of the person's name tokens
+  // (order-insensitive, so "patel amit" finds "PATEL, Amitkumar")
+  const ps=qToks.length?IDX.people.filter(p=>
+    qToks.every(t=>p.tokens.some(tok=>tok.startsWith(t)))||p.person.toLowerCase().includes(q)
+  ).slice(0,12):[];
   let h="";
-  if(cs.length){h+='<div class="section"><h2>Clients</h2></div><div class="card rowlist">'+cs.map(clientRow).join("")+"</div>"}
+  if(cs.length){h+='<div class="section"><h2>Clients</h2><span class="count2">'+scored.length+'</span></div><div class="card rowlist">'+cs.map(clientRow).join("")+"</div>";
+    if(scored.length>40)h+=srcNote("Showing the first 40 — narrow the search.")}
   if(ps.length){h+='<div class="section"><h2>People</h2></div><div class="card rowlist">'+ps.map(p=>{
-    const comps=[...new Set(p.entries.map(e=>e.company).filter(Boolean))];
-    return '<div class="row" data-person="'+esc(p.person)+'"><div class="avatar">'+esc(initials(p.person))+'</div><div class="rmain"><div class="rname">'+esc(p.person)+'</div><div class="rsub">'+esc(comps.slice(0,2).join(" · "))+'</div></div><span class="pill gold">personal code</span><span class="chev">'+IC("chev-r")+'</span></div>';
+    const compNames=[...new Set([
+      ...[...(p.codeClients||[])].map(k=>{const c=IDX.byKey.get(k);return c&&c.name}).filter(Boolean),
+      ...p.ch.map(r=>{const c=IDX.byKey.get(normNo(r.companyNo));return c?c.name:("#"+r.companyNo)})
+    ])];
+    const tags=(p.entries.length?'<span class="pill gold">code</span>':"")+(p.ch.length?'<span class="pill">CH</span>':"");
+    return '<div class="row" data-person="'+esc(p.key)+'"><div class="avatar">'+esc(initials(p.person))+'</div><div class="rmain"><div class="rname">'+esc(p.person)+'</div><div class="rsub">'+esc(compNames.slice(0,3).join(" · ")||"no companies linked")+'</div></div>'+tags+'<span class="chev">'+IC("chev-r")+'</span></div>';
   }).join("")+"</div>"}
   return h||'<div class="empty"><span class="big">'+IC("search-x")+'</span>No matches for “'+esc(Q)+'”</div>';
 }
@@ -782,16 +961,27 @@ function renderHome(v){
   v.innerHTML=h;wire(v);
 }
 
+let OWNERFILTER="";
 function renderClients(v){
   if(Q){v.innerHTML=searchResults();wire(v);return}
-  let h="",letter="";
+  let h='<div class="filters" style="margin-top:12px"><button class="fbtn'+(OWNERFILTER===""?" on":"")+'" data-owf="">All</button>'+
+    OWNERS.map(o=>'<button class="fbtn'+(OWNERFILTER===o?" on":"")+'" data-owf="'+esc(o)+'">'+esc(o)+'</button>').join("")+
+    '<button class="fbtn'+(OWNERFILTER==="—"?" on":"")+'" data-owf="—">Unassigned</button></div>';
+  let list=IDX.clients;
+  if(OWNERFILTER){
+    list=list.filter(c=>{const a=clientAcct(c);const ow=a?String(a.owner||"").trim():"";
+      return OWNERFILTER==="—"?(a&&!ow):ow===OWNERFILTER;});
+    h+='<div class="section"><h2>'+esc(OWNERFILTER==="—"?"On the master sheet, unassigned":OWNERFILTER+"'s clients")+'</h2><span class="count2">'+list.length+"</span></div>";
+  }
+  let letter="";
   h+='<div class="card rowlist">';
-  IDX.clients.forEach(c=>{
+  list.forEach(c=>{
     const L=(c.name[0]||"#").toUpperCase();
-    if(L!==letter){letter=L;h+='</div><div class="gletter">'+esc(L)+'</div><div class="card rowlist">'}
+    if(L!==letter&&!OWNERFILTER){letter=L;h+='</div><div class="gletter">'+esc(L)+'</div><div class="card rowlist">'}
     h+=clientRow(c);
   });
   h+="</div>";
+  if(OWNERFILTER&&!list.length)h='<div class="empty"><span class="big">'+IC("check")+'</span>Nothing here</div>';
   v.innerHTML=h.replace('<div class="card rowlist"></div>',"");wire(v);
 }
 
@@ -876,22 +1066,34 @@ function renderDetail(v){
       const days=daysTo(due),cls=dueClass(days,o),note=dueNote(days,o);
       h+='<div class="duecard '+cls+'"><div class="dl">'+lab+'</div><div class="dv">'+esc(due)+'</div><div class="dn">'+esc(sub)+(note?" · <b>"+esc(note)+"</b>":"")+"</div></div>";
     });
-    h+='</div><div class="srcnote">Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(cv?" · VAT computed from the stagger":"")+"</div>";
+    h+='</div>';
   }
-  // Accounts info — live mirror of the year-end master sheet (read-only here)
+  if(duecards.length||c.no){
+    h+='<div class="srcnote" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>'+
+       (duecards.length?'Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(cv?" · VAT computed from the stagger":""):'No Companies House data held yet')+
+       '</span>'+(c.no?'<button class="linkbtn" data-chrefresh="'+esc(c.no)+'">'+IC("refresh")+'Refresh from CH</button>':"")+'</div>';
+  }
+  // Accounts info — live mirror of the year-end master sheet; workflow fields
+  // (status/owner/follow-up) are EDITABLE and write back to the sheet via the cloud
   const acct=IDX.master&&IDX.master.get(normName(c.name));
   if(acct){
     const ye=(acct.accountFrom||acct.accountTo)?((acct.accountFrom||"?")+" – "+(acct.accountTo||"?")):"";
+    const p=parseStatus(acct.acctStatus);
     const g=acctCell("Year end",ye)+acctCell("Accounts due",acct.accountsDue)+acctCell("CS deadline",acct.csDeadline)+
-      acctCell("Owner",acct.owner)+acctCell("Status",acct.acctStatus)+acctCell("IDV due",acct.idvDue)+
-      acctCell("Payroll",acct.payroll)+acctCell("Software",acct.software);
-    if(g){
-      h+='<div class="dsec" style="padding-top:2px"><div class="h3row"><h3>Accounts</h3>'+
-        '<a class="linkbtn mut" style="margin-left:auto" href="https://docs.google.com/spreadsheets/d/'+YE_SHEET_ID+'" target="_blank" rel="noopener">master sheet ↗</a></div>'+
-        '<div class="acctgrid">'+g+'</div>'+
-        (acct.followUp?'<div class="srcnote" style="padding:6px 0 0">Follow-up: '+esc(acct.followUp)+'</div>':"")+
-        (acct.codesHeld?'<div class="srcnote" style="padding:6px 0 0">Codes: '+esc(acct.codesHeld)+'</div>':"")+'</div>';
-    }
+      acctCell("IDV due",acct.idvDue)+acctCell("Payroll",acct.payroll)+acctCell("Software",acct.software);
+    h+='<div class="dsec" style="padding-top:2px"><div class="h3row"><h3>Accounts</h3>'+
+      '<a class="linkbtn mut" style="margin-left:auto" href="https://docs.google.com/spreadsheets/d/'+YE_SHEET_ID+'" target="_blank" rel="noopener">master sheet ↗</a></div>'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:2px 0 10px">'+
+        (acct.acctStatus?stageChip(acct.acctStatus,{full:true}):'<span class="pill mut">no status yet</span>')+
+        (acct.owner?'<span class="pill">'+IC("users")+' '+esc(acct.owner)+"</span>":'<span class="pill mut">unassigned</span>')+
+        (canAcctEdit()?'<button class="editpen" data-wf="'+esc(c.k)+'">'+IC("edit")+'Update</button>':"")+
+      '</div>'+
+      (g?'<div class="acctgrid">'+g+'</div>':"")+
+      (acct.followUp?'<div class="srcnote" style="padding:6px 0 0">Follow-up: '+esc(acct.followUp)+'</div>':"")+
+      (acct.codesHeld?'<div class="srcnote" style="padding:6px 0 0">Code holders: '+esc(acct.codesHeld)+'</div>':"")+'</div>';
+  }else if(IDX.master&&IDX.master.size){
+    h+='<div class="dsec" style="padding-top:2px"><div class="srcnote" style="padding:4px 0">Not found on the master sheet — '+
+       'if this client should be tracked for accounts, add them there (new vault clients are added automatically within ~10 min).</div></div>';
   }
   h+='<div class="dsec">';
   h+='<div class="h3row"><h3>Company details</h3>'+
@@ -904,8 +1106,11 @@ function renderDetail(v){
        (canAddTab("PersonalCodes")?'<button class="btn sm" data-addcode="'+esc(c.k)+'">'+IC("plus")+'Personal code</button>':"")+
        (canAddTab("Logins")?'<button class="btn sm" data-addlogin="'+esc(c.k)+'">'+IC("plus")+'Login</button>':"")+'</div>';
   }
-  // Directors & PSCs — live from Companies House (public register data)
-  const chp=c.no?(STATE.data.People||[]).filter(p=>normNo(p.companyNo)===normNo(c.no)):[];
+  // Directors & PSCs — live from Companies House (public register data).
+  // CH lists the same human twice ("SPITZER, Benjamin Daniel" director +
+  // "Benjamin Daniel Spitzer" PSC) — merge by name tokens, but NEVER when both
+  // rows carry different birth dates (father/son with the same name).
+  const chp=dedupePeople(c.no?(STATE.data.People||[]).filter(p=>normNo(p.companyNo)===normNo(c.no)):[]);
   if(chp.length){
     h+='<h3>Directors &amp; PSCs · Companies House</h3>';
     chp.forEach(p=>{
@@ -954,17 +1159,51 @@ function renderDetail(v){
   v.innerHTML=h;wire(v);
 }
 function renderPerson(v){
-  const p=IDX.people.find(x=>x.person===DETAIL.person);
+  const p=IDX.people.find(x=>x.key===DETAIL.person)||IDX.people.find(x=>x.person===DETAIL.person);
   if(!p){DETAIL=null;paint();return}
+  const pills=[];
+  if(p.entries.length)pills.push('<span class="pill gold">personal code holder</span>');
+  if(p.ch.some(x=>/director/i.test(x.role)))pills.push('<span class="pill">Director</span>');
+  if(p.ch.some(x=>/psc/i.test(x.role)))pills.push('<span class="pill amber">PSC</span>');
   let h='<button class="backbtn" id="back">'+IC("arrow-l")+'Back</button><div class="card" style="margin-top:10px">'+
-    '<div class="dhead"><h2>'+esc(p.person)+'</h2><div class="meta"><span class="pill gold">CH personal code holder</span></div></div><div class="dsec">';
+    '<div class="dhead"><h2>'+esc(p.person)+'</h2><div class="meta">'+pills.join("")+'</div></div><div class="dsec">';
+  // 1) their personal codes (each row keeps its OWN exact name for the reveal)
   p.entries.forEach(pc=>{
     const pm={person:pc.person,company:pc.company};
-    h+='<h3>'+esc(pc.company||"—")+'</h3>'+
+    h+='<h3>'+esc(pc.company||"(no company recorded)")+(pc.person!==p.person?' <span class="muted" style="text-transform:none;letter-spacing:0">as “'+esc(pc.person)+'”</span>':"")+'</h3>'+
       '<div class="fact"><div class="fl">Personal code</div><div class="fv">'+(pc.personalCode==="•••"?"•••••":esc(pc.personalCode||"—"))+"</div>"+
       (pc.personalCode==="•••"?(canReveal("personalCode")?'<button class="reveal" data-rev=\''+esc(JSON.stringify({tab:"PersonalCodes",match:pm,field:"personalCode"}))+'\'>'+RVL+'</button>':'<span class="lockchip">'+IC("lock")+'Admins only</span>'):"")+"</div>"+
       factRow("Verified on",pc.verifiedOn)+factRow("Email",pc.email);
   });
+  // 2) clients their code rows attached to (shorthand-split, unambiguous only)
+  const codeClients=[...(p.codeClients||[])].map(k=>IDX.byKey.get(k)).filter(Boolean);
+  if(codeClients.length){
+    h+='<h3>Their clients (from the codes sheet)</h3></div><div class="rowlist" style="padding:0 4px 8px">'+
+       codeClients.map(clientRow).join("")+'</div><div class="dsec" style="padding-top:0">';
+  }
+  // 3) Companies House appointments — the companies themselves, clickable
+  if(p.ch.length){
+    h+='<h3>Companies House appointments</h3></div><div class="rowlist" style="padding:0 4px 8px">';
+    p.ch.forEach(r=>{
+      const cl=IDX.byKey.get(normNo(r.companyNo));
+      const nm=cl?cl.name:("#"+r.companyNo);
+      const idv=r.idv?'<span class="pill '+(/verified/i.test(r.idv)?"green":(/due|open/i.test(r.idv)?"amber":""))+'">'+esc(r.idv)+"</span>":"";
+      h+='<div class="row"'+(cl?' data-open="'+esc(cl.k)+'"':"")+'><div class="avatar">'+esc(initials(nm))+'</div>'+
+         '<div class="rmain"><div class="rname">'+esc(nm)+'</div><div class="rsub">'+esc(r.role||"")+(r.dob?" · b. "+esc(r.dob):"")+' · as “'+esc(r.name)+'”</div></div>'+idv+
+         (cl?'<span class="chev">'+IC("chev-r")+"</span>":"")+"</div>";
+    });
+    h+='</div><div class="dsec" style="padding-top:0">';
+  }
+  // 4) possibly the same person — labelled suggestions, never merged
+  const maybes=IDX.people.map(q=>({q,why:possiblySame(p,q)})).filter(x=>x.why).slice(0,6);
+  if(maybes.length){
+    h+='<h3>Possibly the same person <span class="muted" style="text-transform:none;letter-spacing:0">· different spelling on the register — check before relying on it</span></h3>';
+    maybes.forEach(({q,why})=>{
+      const what=[q.entries.length?q.entries.length+" code(s)":"",q.ch.length?q.ch.length+" CH appointment(s)":""].filter(Boolean).join(" · ");
+      h+='<div class="possible" data-person="'+esc(q.key)+'" style="cursor:pointer"><b>'+esc(q.person)+'</b> — '+esc(what||"no records")+
+         '<div class="why">'+esc(why)+'</div></div>';
+    });
+  }
   h+="</div></div>";
   v.innerHTML=h;wire(v);
 }
@@ -985,6 +1224,33 @@ function renderMore(v){
     });
     h+="</div>";
   }
+  if(STATE.role==="admin"&&IDX.master&&IDX.master.size){
+    // data quality: what silently doesn't line up between the sheet and the vault
+    const clientNames=new Set(IDX.clients.map(c=>normName(c.name)));
+    const unmatched=[...IDX.master.values()].filter(m=>!clientNames.has(normName(m.company)));
+    const seen=new Map(),dupes=new Set();
+    (STATE.master||[]).forEach(m=>{const n=normName(m.company);if(!n)return;if(seen.has(n))dupes.add(m.company);seen.set(n,1)});
+    const noCrn=IDX.clients.filter(c=>!c.no).length;
+    const oerr=STATE.outboxErrors||[];
+    h+='<div class="section"><h2>Data quality</h2></div><div class="card" style="padding:14px 16px;font-size:13.5px">';
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'+
+       '<span class="pill '+(unmatched.length?"amber":"green")+'">'+unmatched.length+' sheet rows not matched to a vault client</span>'+
+       '<span class="pill '+(dupes.size?"red":"green")+'">'+dupes.size+' duplicate names on the sheet</span>'+
+       '<span class="pill">'+noCrn+' clients with no company number</span>'+
+       '<span class="pill '+(oerr.length?"red":"green")+'">'+oerr.length+' failed sheet write-backs</span></div>';
+    if(dupes.size)h+='<div class="muted" style="font-size:12.5px">Duplicates (edits refused until fixed on the sheet): '+esc([...dupes].join(", "))+'</div>';
+    if(unmatched.length)h+='<details style="margin-top:6px"><summary style="font-size:12.5px;color:var(--mut);cursor:pointer">Unmatched sheet rows — accounts info not showing on any dossier</summary><div class="muted" style="font-size:12.5px;margin-top:6px">'+
+      esc(unmatched.slice(0,25).map(m=>m.company).join(" · "))+(unmatched.length>25?" · +"+(unmatched.length-25)+" more":"")+'</div></details>';
+    oerr.forEach(e=>{h+='<div class="muted" style="font-size:12.5px;margin-top:4px">⚠ '+esc(e.kind)+': '+esc(e.message||"")+'</div>'});
+    h+='</div>';
+  }
+  h+='<div class="section"><h2>Companies House</h2></div><div class="card" style="padding:14px 16px;font-size:13.5px">'+
+     '<div>Full estate sweep: <b>'+esc(STATE.chSweep||"never run from the cloud yet")+'</b></div>'+
+     '<div class="muted" style="font-size:12.5px;margin-top:4px">Runs automatically every Monday morning on Google\'s servers'+
+     (STATE.lastCloudTick?' · cloud heartbeat '+esc(String(STATE.lastCloudTick).slice(0,16).replace("T"," ")):"")+
+     '. Each client also has its own “Refresh from CH” button on the dossier.</div>'+
+     (STATE.role==="admin"?'<div style="margin-top:10px"><button class="btn sm" data-sweep="1">'+IC("refresh")+'Refresh ALL from CH</button></div>':"")+
+     '</div>';
   if(STATE.role==="admin"&&STATE.changes){
     h+='<div class="section"><h2>Recent changes</h2><span class="count2">'+STATE.changes.length+'</span></div><div class="card">';
     h+=STATE.changes.length?STATE.changes.slice(0,60).map(chgRow).join(""):'<div class="empty" style="padding:22px">No edits yet</div>';
@@ -1017,6 +1283,7 @@ function wire(v){
   v.querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>openClient(el.dataset.open));
   v.querySelectorAll("[data-person]").forEach(el=>el.onclick=()=>{DETAIL={person:el.dataset.person};window.scrollTo(0,0);paint()});
   v.querySelectorAll("[data-nav]").forEach(el=>el.onclick=()=>{VIEWN=el.dataset.nav;DETAIL=null;if(el.dataset.f)DLFILTER=el.dataset.f;paint()});
+  v.querySelectorAll("[data-owf]").forEach(el=>el.onclick=()=>{OWNERFILTER=el.dataset.owf;paint()});
   v.querySelectorAll("[data-dlf]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlf;CAL.sel=null;paint()});
   v.querySelectorAll("[data-dlnav]").forEach(el=>el.onclick=()=>{DLFILTER=el.dataset.dlnav;CAL.sel=null;VIEWN="deadlines";DETAIL=null;window.scrollTo(0,0);paint()});
   v.querySelectorAll("[data-cal]").forEach(el=>el.onclick=()=>{
@@ -1058,6 +1325,26 @@ function wire(v){
       b.closest(".locked").after(div);b.remove();
     }catch(err){b.textContent="Open";b.disabled=false;toast(err.message||"Failed")}
   });
+  v.querySelectorAll("[data-chrefresh]").forEach(b=>b.onclick=async()=>{
+    const no=b.dataset.chrefresh;
+    b.disabled=true;b.textContent="Checking Companies House…";
+    try{
+      const j=await api("chRefreshOne",{companyNo:no});
+      const d=STATE.data.Deadlines||[];
+      const i=d.findIndex(r=>normNo(r.companyNo)===normNo(no));
+      if(j.deadlines){ if(i>=0)d[i]=j.deadlines; else d.push(j.deadlines); STATE.data.Deadlines=d; }
+      STATE.data.People=(STATE.data.People||[]).filter(p=>normNo(p.companyNo)!==normNo(no)).concat(j.people||[]);
+      LASTSTR=null;                      // state diverged from the cached bulk — force next refresh to repaint
+      buildIndex();paint();toast("Fresh from Companies House");
+    }catch(e){ b.disabled=false;b.innerHTML=IC("refresh")+"Refresh from CH";toast(e.message||"CH refresh failed"); }
+  });
+  v.querySelectorAll("[data-sweep]").forEach(b=>b.onclick=async()=>{
+    b.disabled=true;b.textContent="Queuing…";
+    try{ const j=await api("chSweepStart",{});toast("Full CH sweep queued — the cloud runs it over the next ~2 hours");
+         b.textContent="Sweep queued ✓"; }
+    catch(e){ b.disabled=false;b.textContent="Refresh ALL from CH";toast(e.message||"Failed") }
+  });
+  v.querySelectorAll("[data-wf]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.wf);if(c)openWorkflow(c)});
   v.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.edit);if(c)openEditDetails(c)});
   v.querySelectorAll("[data-addcode]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.addcode);openAddCode(c?c.name:"")});
   v.querySelectorAll("[data-addlogin]").forEach(b=>b.onclick=()=>{const c=IDX.byKey.get(b.dataset.addlogin);openAddLogin(c?c.name:"")});
@@ -1280,6 +1567,58 @@ function openEditDetails(c){
     if(STATE.role==="admin")["authCode","ggId","ggPassword","ni","dob"].forEach(k=>{const el=$("#ed_"+k);if(el&&el.value.trim())fields[k]=el.value.trim();});
     if(!Object.keys(fields).length){toast("No changes");return}
     doWrite("update",{tab:"Companies",id:r.id,fields:fields,baseUpdatedAt:r.updatedAt||""},"Saved");
+  };
+}
+
+/* ----- workflow: status / owner / follow-up (writes back to the master sheet) ----- */
+function canAcctEdit(){ if(!STATE)return false; if(STATE.role==="admin")return true;
+  const t=((STATE.write||{})[STATE.role]||{}).Accounts; return !!(t&&t.edit); }
+function openWorkflow(c){
+  const acct=IDX.master.get(normName(c.name));
+  if(!acct){toast("Not on the master sheet");return}
+  const p=parseStatus(acct.acctStatus);
+  let h='<h2>'+esc(acct.company)+'</h2><p>Status and owner sync to the master sheet within ~10 minutes. Every change is logged.</p>';
+  h+='<div class="field"><label>Stage</label><div class="stagegrid" id="wfStages">'+
+     STAGES.map(([s])=>'<button type="button" data-st="'+esc(s)+'"'+(p.stage===s?' class="on"':"")+'>'+esc(s)+'</button>').join("")+
+     '</div></div>';
+  h+='<div class="field"><label>Detail <span class="muted">· dates, routing instructions, one-off notes — kept verbatim</span></label>'+
+     '<input id="wfDetail" value="'+esc(p.detail)+'"><div class="hint" id="wfHint"></div></div>';
+  h+='<div class="field"><label>Owner</label><div class="ownerrow" id="wfOwner">'+
+     OWNERS.map(o=>'<button type="button" data-ow="'+esc(o)+'"'+(acct.owner===o?' class="on"':"")+'>'+esc(o)+'</button>').join("")+
+     '<button type="button" data-ow=""'+(!acct.owner?' class="on"':"")+'>Unassigned</button></div></div>';
+  h+='<div class="field"><label>Follow-up note</label><textarea id="wfFollow">'+esc(acct.followUp||"")+'</textarea></div>';
+  h+=modalButtons("wfSave","Save");
+  openModal2(h);
+  let stage=p.stage, owner=acct.owner||"";
+  const hint=()=>{ $("#wfHint").textContent=CHASE_STAGES.has(stage)&&!/\d{2}\/\d{2}\/\d{4}/.test($("#wfDetail").value)
+      ?("Today's date ("+todayDMY()+") will be added automatically"):""; };
+  $("#wfStages").querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{
+    stage=b.dataset.st;$("#wfStages").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));hint();});
+  $("#wfDetail").oninput=hint; hint();
+  $("#wfOwner").querySelectorAll("[data-ow]").forEach(b=>b.onclick=()=>{
+    owner=b.dataset.ow;$("#wfOwner").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));});
+  $("#m2Cancel").onclick=closeModal2;
+  $("#wfSave").onclick=async()=>{
+    let detail=$("#wfDetail").value.trim();
+    if(CHASE_STAGES.has(stage)&&!/\d{2}\/\d{2}\/\d{4}/.test(detail))detail=(detail?detail+" ":"")+todayDMY();
+    const sep=(stage===p.stage&&p.sep)?p.sep:" ";
+    const status=stage==="Other"?detail:(stage+(detail?sep+detail:""));
+    const fields={};
+    if(status!==String(acct.acctStatus||""))fields.status=status;
+    if(owner!==String(acct.owner||""))fields.owner=owner;
+    const fu=$("#wfFollow").value.trim();
+    if(fu!==String(acct.followUp||""))fields.followUp=fu;
+    if(!Object.keys(fields).length){toast("No changes");return}
+    $("#wfSave").disabled=true;$("#wfSave").textContent="Saving…";
+    try{
+      await api("updateAccounts",{company:acct.company,fields});
+      // optimistic: patch the mirror row in place so every view updates instantly
+      if(fields.status!=null)acct.acctStatus=fields.status;
+      if(fields.owner!=null)acct.owner=fields.owner;
+      if(fields.followUp!=null)acct.followUp=fields.followUp;
+      LASTSTR=null; closeModal2(); paint();
+      toast("Saved — master sheet updates within ~10 min");
+    }catch(e){ $("#wfSave").disabled=false;$("#wfSave").textContent="Save";toast(e.message||"Couldn't save"); }
   };
 }
 
