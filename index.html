@@ -2,15 +2,14 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<title>MAP Vault</title>
+<title>MAP Vault · Client workspace</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f5f7">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0f14">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f4f1">
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='15' fill='%233a56d4'/><path d='M32 12l14 5v11c0 9-5.7 15.4-14 19-8.3-3.6-14-10-14-19V17l14-5Z' fill='none' stroke='white' stroke-width='4' stroke-linejoin='round'/><circle cx='32' cy='27' r='4' fill='white'/><path d='M32 31v8' stroke='white' stroke-width='4' stroke-linecap='round'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='15' fill='%23145c4b'/><path d='M32 12l14 5v11c0 9-5.7 15.4-14 19-8.3-3.6-14-10-14-19V17l14-5Z' fill='none' stroke='white' stroke-width='4' stroke-linejoin='round'/><circle cx='32' cy='27' r='4' fill='white'/><path d='M32 31v8' stroke='white' stroke-width='4' stroke-linecap='round'/></svg>">
 <style>
 /* MAP Vault — single-file client. System fonts, inline SVG icons, no external requests. */
 :root{
@@ -22,17 +21,8 @@
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --navh:64px;
-  color-scheme:light dark;
+  color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0f1116; --card:#16191f; --ink:#e6e9f0; --mut:#939dac; --line:#262a33;
-  --accent:#8ea4ff; --accent-soft:#1e2536; --accent-ink:#0e1220; --chip:#1e222a;
-  --red:#f0857a; --redbg:#2e1a17; --amber:#e3b25f; --amberbg:#2c220f;
-  --green:#5ec78f; --greenbg:#12271b; --gold:#d9be67; --goldbg:#282112;
-  --shadow:0 1px 2px rgba(0,0,0,.45),0 8px 22px rgba(0,0,0,.32);
-}}
-:root[data-theme="light"]{--bg:#f4f5f7;--card:#ffffff;--ink:#191d26;--mut:#5f6b7e;--line:#e4e6eb;--accent:#3a56d4;--accent-soft:#eceffb;--accent-ink:#ffffff;--chip:#eef0f4;--red:#c93a2c;--redbg:#faeae7;--amber:#96610a;--amberbg:#f7efdc;--green:#1d7a46;--greenbg:#e3f2e8;--gold:#8a6d1a;--goldbg:#f6efd8;--shadow:0 1px 2px rgba(18,22,33,.05),0 4px 14px rgba(18,22,33,.05);color-scheme:light}
-:root[data-theme="dark"]{--bg:#0f1116;--card:#16191f;--ink:#e6e9f0;--mut:#939dac;--line:#262a33;--accent:#8ea4ff;--accent-soft:#1e2536;--accent-ink:#0e1220;--chip:#1e222a;--red:#f0857a;--redbg:#2e1a17;--amber:#e3b25f;--amberbg:#2c220f;--green:#5ec78f;--greenbg:#12271b;--gold:#d9be67;--goldbg:#282112;--shadow:0 1px 2px rgba(0,0,0,.45),0 8px 22px rgba(0,0,0,.32);color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
@@ -62,15 +52,6 @@ h1{font-size:16.5px;margin:0;font-weight:700;letter-spacing:-.01em}
 .iconbtn{border:1px solid var(--line);background:var(--card);border-radius:9px;width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;color:var(--mut)}
 .iconbtn .ic{width:17px;height:17px}
 #who{font-size:12.5px;color:var(--mut);font-weight:500}
-.tsun{display:none}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .tsun{display:block}
-  :root:not([data-theme="light"]) .tmoon{display:none}
-}
-:root[data-theme="dark"] .tsun{display:block}
-:root[data-theme="dark"] .tmoon{display:none}
-:root[data-theme="light"] .tsun{display:none}
-:root[data-theme="light"] .tmoon{display:block}
 
 /* ---------- search ---------- */
 .searchwrap{position:sticky;top:calc(59px + env(safe-area-inset-top));z-index:25;background:var(--bg);padding:12px 16px 8px;max-width:760px;margin:0 auto}
@@ -129,8 +110,6 @@ h1{font-size:16.5px;margin:0;font-weight:700;letter-spacing:-.01em}
 .reveal .ic{width:15px;height:15px}
 .reveal:disabled{opacity:.6;cursor:default}
 @media(hover:hover){.reveal:hover{filter:brightness(.96)}}
-:root[data-theme="dark"] .reveal:hover{filter:brightness(1.1)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .reveal:hover{filter:brightness(1.1)}}
 .lockchip{font-size:12px;color:var(--mut);background:var(--chip);border-radius:7px;padding:6px 10px;flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-weight:550}
 .lockchip .ic{width:13px;height:13px}
 .revealed{background:var(--goldbg);color:var(--gold);border-radius:6px;padding:2px 7px}
@@ -300,6 +279,156 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 .ownerrow button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .possible{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13px}
 .possible .why{font-size:11.5px;color:var(--mut);margin-top:2px}
+
+/* ---------- v8: practice workspace redesign ---------- */
+:root{
+  --bg:#f3f4f1;--card:#ffffff;--ink:#17201d;--mut:#68726d;--line:#dfe4df;
+  --accent:#145c4b;--accent-soft:#e4f0ec;--accent-ink:#ffffff;--chip:#eef1ee;
+  --red:#a43a31;--redbg:#f7e8e5;--amber:#8a5a13;--amberbg:#f7eedc;
+  --green:#21734f;--greenbg:#e3f1e9;--gold:#76601b;--goldbg:#f3edd8;
+  --shadow:0 1px 2px rgba(21,32,28,.04),0 8px 24px rgba(21,32,28,.055);
+  --navw:228px;--navh:72px;
+}
+body{font-size:15px;background:
+  linear-gradient(180deg,color-mix(in srgb,var(--accent-soft) 24%,transparent) 0,transparent 220px),var(--bg)}
+header{height:64px;padding:10px 16px;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(14px)}
+.logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink)}
+.logo .ic{width:21px;height:21px}
+.brandcopy{display:flex;flex-direction:column;line-height:1.1}
+.brandcopy h1{font-size:15px;letter-spacing:-.01em}
+.brandcopy small{font-size:10.5px;color:var(--mut);font-weight:650;margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+.userbox{display:flex;align-items:center;gap:8px;padding:5px 9px 5px 7px;border:1px solid var(--line);background:var(--card);border-radius:10px}
+.useravatar{width:27px;height:27px;border-radius:8px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:800}
+#who{font-size:12px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{border-radius:10px;background:var(--card)}
+
+.searchwrap{top:calc(64px + env(safe-area-inset-top));padding:12px 16px 7px;max-width:1080px}
+.searchbox{border-radius:11px;padding:12px 14px;box-shadow:0 1px 1px rgba(20,32,27,.02)}
+.searchbox input{font-size:15px}
+.wrap{max-width:1080px;padding:8px 16px 48px}
+.card{border-radius:12px;box-shadow:var(--shadow)}
+.section{margin:20px 0 9px}
+.section h2{font-size:11px;letter-spacing:.09em}
+.count2{background:var(--chip);border-radius:99px;padding:2px 8px;font-size:11px}
+
+.pageintro{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:14px 0 16px}
+.pageintro h2{font-size:25px;line-height:1.15;letter-spacing:-.035em;margin:3px 0 4px;font-weight:720}
+.pageintro p{margin:0;color:var(--mut);font-size:13.5px;max-width:620px}
+.eyebrow{color:var(--accent);font-size:10.5px;font-weight:750;text-transform:uppercase;letter-spacing:.11em}
+
+.metricgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:15px}
+.metric{position:relative;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:13px;min-height:88px;box-shadow:var(--shadow)}
+.metric:hover{border-color:color-mix(in srgb,var(--accent) 35%,var(--line));text-decoration:none}
+.metric .mlabel{display:block;font-size:11.5px;color:var(--mut);font-weight:650}
+.metric .mvalue{display:block;font-size:25px;line-height:1;margin-top:9px;font-weight:740;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.metric .mnote{position:absolute;right:12px;bottom:12px;font-size:10.5px;color:var(--mut)}
+.metric.urgent .mvalue{color:var(--red)}
+.metric.vat .mvalue{color:var(--green)}
+.metric.accounts .mvalue{color:var(--accent)}
+
+.filters{gap:7px;padding:1px 0 11px}
+.fbtn{border-radius:9px;padding:8px 12px;font-size:12.5px;background:var(--card)}
+.fbtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.dategroups{display:grid;gap:12px}
+.dategroup{border:1px solid var(--line);border-radius:13px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.datehead{display:flex;align-items:center;gap:10px;padding:10px 13px;background:color-mix(in srgb,var(--chip) 55%,var(--card));border-bottom:1px solid var(--line)}
+.datehead .daybox{width:39px;height:39px;border-radius:9px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:16px;font-weight:760;font-variant-numeric:tabular-nums}
+.datehead .datecopy{min-width:0}
+.datehead .datecopy b{display:block;font-size:13px}
+.datehead .datecopy span{display:block;color:var(--mut);font-size:11.5px;margin-top:1px}
+.datehead .count2{margin-left:auto}
+.dategroup .rowlist{box-shadow:none;border:none;border-radius:0}
+
+.rowlist .row{padding:11px 13px;min-height:62px}
+.row .avatar{width:36px;height:36px;border-radius:9px;font-size:12.5px}
+.row .rname{font-size:14px;font-weight:650}
+.row .rsub{font-family:var(--sans);font-size:11.5px;margin-top:2px}
+.rowlist .row>.pill{font-size:11.5px;text-align:right}
+.stagechip{max-width:170px;overflow:hidden;text-overflow:ellipsis}
+
+.listhead{display:none;color:var(--mut);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;padding:0 13px 7px}
+.clientbook{display:grid;gap:10px}
+.gletter{position:relative;top:auto;padding:8px 2px 2px;background:transparent;color:var(--accent)}
+
+.dhead{padding:20px 18px 16px}
+.dhead h2{font-size:23px;letter-spacing:-.03em}
+.dhead .meta{gap:7px}
+.dueband{padding:15px 18px 6px;gap:9px}
+.duecard{padding:12px 13px;background:color-mix(in srgb,var(--bg) 46%,var(--card));border-radius:11px}
+.duecard .dv{font-size:18px}
+.dsec{padding:6px 18px 18px}
+.dsec h3{font-size:10.5px;letter-spacing:.1em;margin-top:22px}
+.fact{padding:10px 0}
+.fact .fl{width:145px;font-size:12px}
+.fact .fv{font-size:13px}
+.acctgrid{gap:8px}
+.acctcell{border-radius:10px;background:color-mix(in srgb,var(--bg) 52%,var(--card))}
+.backbtn{padding-left:2px}
+.reveal{background:var(--goldbg);border:1px solid color-mix(in srgb,var(--gold) 25%,transparent)}
+
+.cal{padding:16px;margin-top:2px}
+.calhead{margin-bottom:12px}
+.calhead b{font-size:17px}
+.cd{height:62px}
+.calgrid{gap:5px}
+.callegend{padding-top:4px;border-top:1px solid var(--line);margin-top:13px}
+
+.fab{height:46px;border-radius:11px;padding:0 16px;box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 28%,transparent)}
+.modal{border-radius:18px 18px 0 0}
+.modal h2{font-size:20px;letter-spacing:-.025em}
+.btn{border-radius:9px}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+
+@media(max-width:639px){
+  .userbox{border:none;background:transparent;padding:0}
+  .useravatar,#who{display:none}
+  .filters{flex-wrap:wrap;overflow-x:visible}
+  .pageintro h2{font-size:22px}
+  .pageintro p{font-size:12.5px}
+  .metric{min-height:82px;padding:12px}
+  .metric .mvalue{font-size:23px}
+  .datehead{position:relative;top:auto;z-index:1}
+  .rowlist .row{align-items:flex-start}
+  .rowlist .row>.stagechip{display:none}
+  .rowlist .row>.pill{max-width:106px;white-space:normal;line-height:1.25;padding-top:3px}
+  .fact{align-items:flex-start;flex-wrap:wrap}
+  .fact .fl{width:100%;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em}
+  .fact .fv{min-width:0}
+  .dueband{grid-template-columns:1fr!important}
+}
+
+@media(min-width:900px){
+  body{padding:0 0 0 var(--navw)}
+  header{height:72px;padding:12px 20px 12px 18px;left:0;right:0}
+  header .logo{margin-left:0}
+  header .brandcopy{min-width:170px}
+  nav{top:72px;bottom:0;left:0;right:auto;width:var(--navw);height:auto;padding:22px 14px;border-top:none;border-right:1px solid var(--line);
+    background:color-mix(in srgb,var(--card) 96%,transparent);display:flex;flex-direction:column;justify-content:flex-start;gap:5px}
+  nav:before{content:"WORKSPACE";font-size:9.5px;letter-spacing:.13em;color:var(--mut);font-weight:750;padding:0 11px 7px}
+  nav button{max-width:none;width:100%;height:43px;flex:none;flex-direction:row;justify-content:flex-start;gap:10px;padding:0 10px;border-radius:9px;font-size:13px}
+  nav button .ni{padding:0;background:transparent!important}
+  nav button .ni .ic{width:18px;height:18px}
+  nav button.on{background:var(--accent-soft);color:var(--accent)}
+  .searchwrap{top:72px;max-width:1120px;padding:18px 20px 8px}
+  .wrap{max-width:1120px;padding:10px 20px 64px}
+  .metricgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+  .metric{min-height:98px;padding:15px}
+  .metric .mvalue{font-size:29px}
+  .listhead{display:grid;grid-template-columns:minmax(260px,1fr) 180px 150px 24px;gap:12px}
+  .rowlist .row{display:grid;grid-template-columns:44px minmax(250px,1fr) auto auto 18px;gap:12px;min-height:66px;padding:10px 14px}
+  .row .avatar{grid-column:1}
+  .row .rmain{grid-column:2}
+  .row>.stagechip{grid-column:3}
+  .row>.pill{grid-column:4}
+  .row>.chev{grid-column:5}
+  .dategroup .rowlist .row{grid-template-columns:44px minmax(280px,1fr) auto minmax(140px,auto) 18px}
+  .pageintro{margin-top:18px}
+  .dhead,.dueband,.dsec{padding-left:22px;padding-right:22px}
+  .dsec{max-width:960px}
+  .modal{border-radius:16px}
+  .fab{right:24px;bottom:24px}
+}
 </style>
 </head>
 <body>
@@ -335,11 +464,10 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 </defs></svg>
 
 <header>
-  <span class="logo"><svg class="ic"><use href="#i-mark"/></svg></span><h1>MAP Vault</h1>
+  <span class="logo"><svg class="ic"><use href="#i-mark"/></svg></span>
+  <span class="brandcopy"><h1>MAP Vault</h1><small>Client workspace</small></span>
   <span class="grow"></span>
-  <span id="who"></span>
-  <span class="conn" id="conn"></span>
-  <button class="iconbtn" id="themeBtn" title="Light/dark"><svg class="ic tsun"><use href="#i-sun"/></svg><svg class="ic tmoon"><use href="#i-moon"/></svg></button>
+  <span class="userbox"><span class="useravatar">MA</span><span id="who"></span><span class="conn" id="conn"></span></span>
 </header>
 
 <div class="searchwrap" id="searchwrap">
@@ -391,7 +519,7 @@ table.misc td:first-child{color:var(--mut);font-family:var(--sans);font-size:12p
 const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyopmm6e_aymCbnz3phNKU9Ag-9vaXf0nQVjnn3ukOukLqSJj6oPNy5veC2KuPKuuew/exec";
 const YE_SHEET_ID = "1WkEkfxoyn6ckxvAsAVp1_z1Egi1WmQ5SD9fK8cI_bT0";   // year-end master sheet (for the "edit on the master sheet" link)
 const WRITE_OPS = {add:1,update:1,remove:1,restore:1};                 // sent by POST + text/plain (CORS simple request, carries secrets off-URL)
-const CFG_KEY="mapvault.cfg", THEME_KEY="mapvault.theme", RECENT_KEY="mapvault.recent", CACHE_KEY="mapvault.cache";
+const CFG_KEY="mapvault.cfg", RECENT_KEY="mapvault.recent", CACHE_KEY="mapvault.cache";
 let CFG=loadJ(CFG_KEY,{}), STATE=null, IDX=null, VIEWN="home", DETAIL=null, Q="", DLFILTER="soon", LASTSTR=null;
 
 /* ---------- utils ---------- */
@@ -442,7 +570,7 @@ function stageChip(status,{full=false}={}){
   if(!p.stage)return"";
   const label=full&&p.detail?p.stage+" · "+p.detail:p.stage;
   const c=p.cls==="blue"?"":p.cls;   // blue = default accent pill
-  return '<span class="pill '+esc(c)+'" title="'+esc(status)+'">'+esc(label)+"</span>";
+  return '<span class="pill stagechip '+esc(c)+'" title="'+esc(status)+'">'+esc(label)+"</span>";
 }
 const OWNERS=["Ankur","Priyanka","Ronak","Suman","Bhavya"];
 function todayDMY(){const d=new Date(),p=x=>String(x).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()}
@@ -499,7 +627,29 @@ function possiblySame(a,b){
   return null;
 }
 function initials(s){const w=String(s||"?").split(/\s+/).filter(Boolean);return ((w[0]||"?")[0]+(w[1]?w[1][0]:"")).toUpperCase()}
-function parseDMY(s){if(!s)return null;const p=String(s).split("/");if(p.length!==3)return null;const d=new Date(+p[2],+p[1]-1,+p[0]);return isNaN(d)?null:d}
+function parseDMY(s){
+  if(!s)return null;
+  if(s instanceof Date)return isNaN(s)?null:s;
+  const p=String(s).trim().split("/");
+  if(p.length===3&&p.every(x=>/^\d+$/.test(x))){
+    const d=new Date(+p[2],+p[1]-1,+p[0]);
+    return isNaN(d)?null:d;
+  }
+  const d=new Date(s);
+  return isNaN(d)?null:d;
+}
+function dateLabel(s){
+  const d=parseDMY(s);
+  return d?String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear():String(s||"");
+}
+function dateTimeLabel(s){
+  const v=String(s||"").trim();
+  let m=v.match(/^(\d{4})-(\d{2})-(\d{2})(?:T|\s)?(\d{2}:\d{2})?/);
+  if(m)return m[3]+"/"+m[2]+"/"+m[1]+(m[4]?" "+m[4]:"");
+  m=v.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:T|\s)?(\d{2}:\d{2})?/);
+  if(m)return m[1]+"/"+m[2]+"/"+m[3]+(m[4]?" "+m[4]:"");
+  return v.slice(0,16).replace("T"," ");
+}
 function daysTo(s){const d=parseDMY(s);if(!d)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/86400000)}
 function dueClass(days,overdue){if(overdue||days!=null&&days<0)return"red";if(days!=null&&days<=14)return"red";if(days!=null&&days<=31)return"amber";return""}
 function dueNote(days,overdue){if(overdue)return"OVERDUE";if(days==null)return"";if(days<0)return Math.abs(days)+"d overdue";if(days===0)return"today";if(days===1)return"tomorrow";if(days<=60)return"in "+days+" days";return""}
@@ -826,8 +976,8 @@ function clientVat(c){
 function nextDue(c){
   const cand=[];
   if(c.dl&&c.dl.status==="active"){
-    if(c.dl.accountsDue)cand.push({t:"Accounts",s:c.dl.accountsDue,o:c.dl.accountsOverdue==="yes",days:daysTo(c.dl.accountsDue)});
-    if(c.dl.csDue)cand.push({t:"CS",s:c.dl.csDue,o:c.dl.csOverdue==="yes",days:daysTo(c.dl.csDue)});
+    if(c.dl.accountsDue)cand.push({t:"Accounts",s:dateLabel(c.dl.accountsDue),o:c.dl.accountsOverdue==="yes",days:daysTo(c.dl.accountsDue)});
+    if(c.dl.csDue)cand.push({t:"CS",s:dateLabel(c.dl.csDue),o:c.dl.csOverdue==="yes",days:daysTo(c.dl.csDue)});
   }
   const vat=clientVat(c);
   if(vat)cand.push({t:"VAT",s:vat.due,o:false,days:daysTo(vat.due)});
@@ -847,8 +997,8 @@ function deadlineItems(){
   IDX.clients.forEach(c=>{
     const dl=c.dl;
     if(dl&&dl.status==="active"){
-      if(dl.accountsDue)items.push({c,t:"acc",label:"Accounts",due:dl.accountsDue,days:daysTo(dl.accountsDue),o:dl.accountsOverdue==="yes",sub:"made up to "+(dl.accountsMadeUpTo||"—")});
-      if(dl.csDue)items.push({c,t:"cs",label:"Confirmation statement",due:dl.csDue,days:daysTo(dl.csDue),o:dl.csOverdue==="yes",sub:"statement date "+(dl.csMadeUpTo||"—")});
+      if(dl.accountsDue)items.push({c,t:"acc",label:"Accounts",due:dateLabel(dl.accountsDue),days:daysTo(dl.accountsDue),o:dl.accountsOverdue==="yes",sub:"made up to "+dateLabel(dl.accountsMadeUpTo||"—")});
+      if(dl.csDue)items.push({c,t:"cs",label:"Confirmation statement",due:dateLabel(dl.csDue),days:daysTo(dl.csDue),o:dl.csOverdue==="yes",sub:"statement date "+dateLabel(dl.csMadeUpTo||"—")});
     }
     const vat=clientVat(c);
     if(vat)items.push({c,t:"vat",label:"VAT return",due:vat.due,days:daysTo(vat.due),o:false,
@@ -947,11 +1097,40 @@ const DL_TITLE={soon:"Due in the next 60 days",acc:"Accounts due",cs:"Confirmati
   vat:"VAT returns due",all:"All upcoming filings",overdue:"Overdue — clients we're not filing for"};
 function renderHome(v){
   if(Q){v.innerHTML=searchResults();wire(v);return}
-  const items=dlFiltered(deadlineItems()).sort((a,b)=>(a.days??9e9)-(b.days??9e9));
-  let h='<div class="filters" style="margin-top:12px">'+pillbar("dlf")+"</div>";
+  const all=deadlineItems(), upcoming=all.filter(i=>!isOverdue(i));
+  const items=dlFiltered(all).sort((a,b)=>(a.days??9e9)-(b.days??9e9)||a.c.name.localeCompare(b.c.name));
+  const n14=upcoming.filter(i=>i.days!=null&&i.days<=14).length;
+  const n30=upcoming.filter(i=>i.days!=null&&i.days<=30).length;
+  const nVat=upcoming.filter(i=>i.t==="vat"&&i.days!=null&&i.days<=60).length;
+  const nStat=upcoming.filter(i=>(i.t==="acc"||i.t==="cs")&&i.days!=null&&i.days<=60).length;
+  let h='<div class="pageintro"><div><span class="eyebrow">Practice overview</span><h2>Deadline workspace</h2>'+
+    '<p>See what is due, who owns it and where each job is in the workflow.</p></div></div>';
+  h+='<div class="metricgrid">'+
+    '<button class="metric urgent" data-dlf="soon"><span class="mlabel">Due in 14 days</span><span class="mvalue">'+n14+'</span><span class="mnote">filings</span></button>'+
+    '<button class="metric" data-dlf="soon"><span class="mlabel">Due in 30 days</span><span class="mvalue">'+n30+'</span><span class="mnote">filings</span></button>'+
+    '<button class="metric vat" data-dlf="vat"><span class="mlabel">VAT · next 60 days</span><span class="mvalue">'+nVat+'</span><span class="mnote">returns</span></button>'+
+    '<button class="metric accounts" data-dlf="acc"><span class="mlabel">Accounts &amp; CS</span><span class="mvalue">'+nStat+'</span><span class="mnote">next 60 days</span></button>'+
+    '</div>';
+  h+='<div class="filters">'+pillbar("dlf")+"</div>";
   h+='<div class="section"><h2>'+esc(DL_TITLE[DLFILTER]||"Upcoming")+'</h2><span class="count2">'+items.length+"</span></div>";
-  h+=items.length?'<div class="card rowlist">'+items.slice(0,150).map(dlRow).join("")+"</div>"
-    :'<div class="card"><div class="empty" style="padding:30px"><span class="big">'+IC("check")+'</span>'+(DLFILTER==="overdue"?"Nothing overdue":"Nothing due here")+"</div></div>";
+  if(items.length){
+    const groups=new Map();
+    items.slice(0,150).forEach(i=>{if(!groups.has(i.due))groups.set(i.due,[]);groups.get(i.due).push(i)});
+    h+='<div class="dategroups">';
+    groups.forEach((rows,due)=>{
+      const d=parseDMY(due);
+      const weekday=d?d.toLocaleDateString("en-GB",{weekday:"long"}):"";
+      const month=d?d.toLocaleDateString("en-GB",{month:"short",year:"numeric"}):due;
+      const note=dueNote(rows[0].days,rows[0].o);
+      h+='<section class="dategroup"><div class="datehead"><span class="daybox">'+esc(d?d.getDate():"—")+'</span>'+
+        '<div class="datecopy"><b>'+esc(weekday)+'</b><span>'+esc(month)+(note?" · "+esc(note):"")+'</span></div>'+
+        '<span class="count2">'+rows.length+' filing'+(rows.length===1?"":"s")+'</span></div>'+
+        '<div class="rowlist">'+rows.map(dlRow).join("")+'</div></section>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div class="card"><div class="empty" style="padding:30px"><span class="big">'+IC("check")+'</span>'+(DLFILTER==="overdue"?"Nothing overdue":"Nothing due here")+"</div></div>";
+  }
   if(items.length>150)h+=srcNote("Showing the first 150 — pick a filing type to narrow it.");
   if(DLFILTER==="soon"){
     const recent=(loadJ(RECENT_KEY,[])).map(k=>IDX.byKey.get(k)).filter(Boolean);
@@ -964,7 +1143,9 @@ function renderHome(v){
 let OWNERFILTER="";
 function renderClients(v){
   if(Q){v.innerHTML=searchResults();wire(v);return}
-  let h='<div class="filters" style="margin-top:12px"><button class="fbtn'+(OWNERFILTER===""?" on":"")+'" data-owf="">All</button>'+
+  let h='<div class="pageintro"><div><span class="eyebrow">Client book</span><h2>Clients &amp; responsibilities</h2>'+
+    '<p>Search the full practice, or focus the client book by accounts owner.</p></div></div>';
+  h+='<div class="filters"><button class="fbtn'+(OWNERFILTER===""?" on":"")+'" data-owf="">All</button>'+
     OWNERS.map(o=>'<button class="fbtn'+(OWNERFILTER===o?" on":"")+'" data-owf="'+esc(o)+'">'+esc(o)+'</button>').join("")+
     '<button class="fbtn'+(OWNERFILTER==="—"?" on":"")+'" data-owf="—">Unassigned</button></div>';
   let list=IDX.clients;
@@ -974,13 +1155,13 @@ function renderClients(v){
     h+='<div class="section"><h2>'+esc(OWNERFILTER==="—"?"On the master sheet, unassigned":OWNERFILTER+"'s clients")+'</h2><span class="count2">'+list.length+"</span></div>";
   }
   let letter="";
-  h+='<div class="card rowlist">';
+  h+='<div class="listhead"><span>Client</span><span>Workflow</span><span>Next deadline</span><span></span></div><div class="clientbook"><div class="card rowlist">';
   list.forEach(c=>{
     const L=(c.name[0]||"#").toUpperCase();
     if(L!==letter&&!OWNERFILTER){letter=L;h+='</div><div class="gletter">'+esc(L)+'</div><div class="card rowlist">'}
     h+=clientRow(c);
   });
-  h+="</div>";
+  h+="</div></div>";
   if(OWNERFILTER&&!list.length)h='<div class="empty"><span class="big">'+IC("check")+'</span>Nothing here</div>';
   v.innerHTML=h.replace('<div class="card rowlist"></div>',"");wire(v);
 }
@@ -1018,7 +1199,8 @@ function renderDeadlines(v){
   const items=deadlineItems().filter(i=>!isOverdue(i));   // calendar is forward-looking
   let day=[];
   if(CAL.sel){day=items.filter(i=>i.due===CAL.sel);if(!day.length)CAL.sel=null;}
-  let h='<div class="section" style="margin-top:8px"><h2>Filing calendar</h2></div>';
+  let h='<div class="pageintro"><div><span class="eyebrow">Compliance calendar</span><h2>Filing calendar</h2>'+
+    '<p>Forward-looking Companies House and VAT deadlines, grouped by due date.</p></div></div>';
   h+=calendarHTML(items);
   if(CAL.sel&&day.length){
     day.sort((a,b)=>a.c.name.localeCompare(b.c.name));
@@ -1029,7 +1211,7 @@ function renderDeadlines(v){
   }
   v.innerHTML=h;wire(v);
 }
-function chRefreshed(){const r=(STATE.data.Deadlines||[]).find(x=>x.chRefreshed);return r?r.chRefreshed:""}
+function chRefreshed(){const r=(STATE.data.Deadlines||[]).find(x=>x.chRefreshed);return r?dateLabel(r.chRefreshed):""}
 
 /* ---------- dossier ---------- */
 function canReveal(field){return STATE.role==="admin"||(STATE.staffReveal||[]).includes(field)}
@@ -1056,8 +1238,8 @@ function renderDetail(v){
      sourceTags(r.sources)+
      (r.incDate?'<span>since '+esc(r.incDate)+"</span>":"")+"</div></div>";
   const duecards=[];
-  if(dl&&dl.accountsDue)duecards.push([IC("chart")+"Accounts due",dl.accountsDue,dl.accountsOverdue==="yes","made up to "+(dl.accountsMadeUpTo||"—")]);
-  if(dl&&dl.csDue)duecards.push([IC("file")+"Conf. statement",dl.csDue,dl.csOverdue==="yes","statement date "+(dl.csMadeUpTo||"—")]);
+  if(dl&&dl.accountsDue)duecards.push([IC("chart")+"Accounts due",dateLabel(dl.accountsDue),dl.accountsOverdue==="yes","made up to "+dateLabel(dl.accountsMadeUpTo||"—")]);
+  if(dl&&dl.csDue)duecards.push([IC("file")+"Conf. statement",dateLabel(dl.csDue),dl.csOverdue==="yes","statement date "+dateLabel(dl.csMadeUpTo||"—")]);
   const cv=clientVat(c);
   if(cv)duecards.push([IC("receipt")+"VAT return",cv.due,false,(cv.stagger||"")+" · period end "+(cv.periodEnd||"—")]);
   if(duecards.length){
@@ -1070,16 +1252,16 @@ function renderDetail(v){
   }
   if(duecards.length||c.no){
     h+='<div class="srcnote" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>'+
-       (duecards.length?'Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dl.chRefreshed):"")+(cv?" · VAT computed from the stagger":""):'No Companies House data held yet')+
+       (duecards.length?'Accounts/CS live from Companies House'+(dl&&dl.chRefreshed?" · refreshed "+esc(dateLabel(dl.chRefreshed)):"")+(cv?" · VAT computed from the stagger":""):'No Companies House data held yet')+
        '</span>'+(c.no?'<button class="linkbtn" data-chrefresh="'+esc(c.no)+'">'+IC("refresh")+'Refresh from CH</button>':"")+'</div>';
   }
   // Accounts info — live mirror of the year-end master sheet; workflow fields
   // (status/owner/follow-up) are EDITABLE and write back to the sheet via the cloud
   const acct=IDX.master&&IDX.master.get(normName(c.name));
   if(acct){
-    const ye=(acct.accountFrom||acct.accountTo)?((acct.accountFrom||"?")+" – "+(acct.accountTo||"?")):"";
+    const ye=(acct.accountFrom||acct.accountTo)?(dateLabel(acct.accountFrom||"?")+" – "+dateLabel(acct.accountTo||"?")):"";
     const p=parseStatus(acct.acctStatus);
-    const g=acctCell("Year end",ye)+acctCell("Accounts due",acct.accountsDue)+acctCell("CS deadline",acct.csDeadline)+
+    const g=acctCell("Year end",ye)+acctCell("Accounts due",dateLabel(acct.accountsDue))+acctCell("CS deadline",dateLabel(acct.csDeadline))+
       acctCell("IDV due",acct.idvDue)+acctCell("Payroll",acct.payroll)+acctCell("Software",acct.software);
     h+='<div class="dsec" style="padding-top:2px"><div class="h3row"><h3>Accounts</h3>'+
       '<a class="linkbtn mut" style="margin-left:auto" href="https://docs.google.com/spreadsheets/d/'+YE_SHEET_ID+'" target="_blank" rel="noopener">master sheet ↗</a></div>'+
@@ -1210,7 +1392,9 @@ function renderPerson(v){
 
 /* ---------- more ---------- */
 function renderMore(v){
-  let h='<div class="section"><h2>Reference sheets</h2></div><div class="card">';
+  let h='<div class="pageintro"><div><span class="eyebrow">Practice controls</span><h2>Tools, access &amp; data quality</h2>'+
+    '<p>Reference information, secure credential sheets and the health of the client database.</p></div></div>'+
+    '<div class="section"><h2>Reference sheets</h2></div><div class="card">';
   const misc=STATE.misc||{};
   Object.keys(misc).forEach((tab,i)=>{
     h+='<div class="acc" data-acc="'+i+'"><button>'+IC("file")+esc(tab)+'<span class="chev">'+IC("chev-r")+'</span></button><div class="accbody"><table class="misc">'+
@@ -1624,7 +1808,7 @@ function openWorkflow(c){
 
 /* ----- changes feed helpers (admin) ----- */
 function chgRow(c){
-  return '<div class="chgrow"><div class="ct">'+esc(String(c.when||"").slice(5,16).replace("T"," "))+'</div>'+
+  return '<div class="chgrow"><div class="ct">'+esc(dateTimeLabel(c.when))+'</div>'+
     '<div class="cop '+esc(c.op)+'">'+esc(c.op)+'</div>'+
     '<div style="flex:1;min-width:0"><div>'+esc(c.entity||c.tab)+(c.field?' · <span class="muted">'+esc(c.field)+'</span>':"")+'</div>'+
     (c.newValue&&c.newValue!=="(created)"&&c.newValue!=="•••"?'<div class="muted" style="font-size:11px">'+esc(c.oldValue||"—")+' → '+esc(c.newValue)+'</div>':"")+'</div>'+
@@ -1632,14 +1816,10 @@ function chgRow(c){
 }
 function trashName(t){ try{const o=JSON.parse(t.json);return o.company||o.person||o.entity||o.employer||t.id;}catch(e){return t.id;} }
 
-/* ---------- theme + boot ---------- */
-$("#themeBtn").onclick=()=>{
-  const cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
-  const nx=cur==="dark"?"light":"dark";
-  document.documentElement.setAttribute("data-theme",nx);localStorage.setItem(THEME_KEY,nx);
-};
+/* ---------- boot ---------- */
 (function boot(){
-  const s=localStorage.getItem(THEME_KEY);if(s)document.documentElement.setAttribute("data-theme",s);
+  document.documentElement.setAttribute("data-theme","light");
+  localStorage.removeItem("mapvault.theme");
   const p=new URLSearchParams(location.search);
   if(p.get("k")){
     const nurl=safeUrl(p.get("u"))||DEFAULT_API_URL;   // ignore any non-Google ?u= origin
